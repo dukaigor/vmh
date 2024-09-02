@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem de pontaj - Valery Mystic Hair</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background-color: #2D2D2C; 
+            color: #fff;
+        }
+        select, button, input { 
+            margin: 10px 0; 
+            padding: 10px 15px; 
+            background-color: #3D3D3C; 
+            color: #fff; 
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        select {
+            width: 100%;
+            max-width: 300px;
+        }
+        button {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #4D4D4C;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background-color: #3D3D3C;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td { 
+            border: 1px solid #4D4D4C; 
+            padding: 12px; 
+            text-align: left; 
+        }
+        th { 
+            background-color: #4D4D4C; 
+        }
+        #adminPanel { 
+            display: none; 
+            background-color: #3D3D3C;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        #logo {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            display: block;
+        }
+        .main-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        #accessAdminBtn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: #FF3B30;
+        }
+        #closeAdminBtn {
+            background-color: #FF3B30;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sistem de pontaj - Valery Mystic Hair</h1>
+    
+    <div class="main-controls">
+        <select id="worker" name="worker"></select>
+        <div class="action-buttons">
+            <button onclick="recordAttendance('Am Venit')">Am Venit</button>
+            <button onclick="recordAttendance('Am Ieșit')">Am Ieșit</button>
+        </div>
+    </div>
+    
+    <button id="accessAdminBtn" onclick="accessAdminPanel()">Acces Admin</button>
+    
+    <div id="adminPanel">
+        <button id="closeAdminBtn" onclick="closeAdminPanel()">Închide Panou Admin</button>
+        <h3>Panou de administrare</h3>
+        <input type="text" id="newWorker" placeholder="Nume lucrător nou">
+        <button onclick="addWorker()">Adaugă lucrător</button>
+        <br>
+        <select id="workerToRemove"></select>
+        <button onclick="removeWorker()">Șterge lucrător</button>
+        <br>
+        <button onclick="downloadCSV()">Descarcă tabel (CSV)</button>
+        
+        <table id="attendanceTable">
+            <thead>
+                <tr>
+                    <th>Nume</th>
+                    <th>Acțiune</th>
+                    <th>Data și Ora</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <h3>Ore lucrate pe lună</h3>
+        <table id="hoursWorkedTable">
+            <thead>
+                <tr>
+                    <th>Nume</th>
+                    <th>Ore lucrate</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <img id="logo" src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%202024-07-08%20%D0%B2%2017.39.20-ZoYKfLDx1Dk5H5AP2lXNvUbWo9Ifdi.png" alt="Valery Mystic Hair Logo">
+
+    <script>
+        let workers = ['Olesea', 'Martina', 'Cristina', 'Veronica', 'Inga', 'Vlada'];
+        let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || [];
+
+        function updateWorkerSelects() {
+            const workerSelect = document.getElementById('worker');
+            const workerToRemoveSelect = document.getElementById('workerToRemove');
+            workerSelect.innerHTML = '';
+            workerToRemoveSelect.innerHTML = '';
+            workers.forEach(worker => {
+                workerSelect.add(new Option(worker, worker));
+                workerToRemoveSelect.add(new Option(worker, worker));
+            });
+        }
+
+        function recordAttendance(action) {
+            const worker = document.getElementById('worker').value;
+            const timestamp = new Date().toLocaleString('ro-RO');
+            attendanceData.push({ worker, action, timestamp });
+            localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+            alert(`Acțiune înregistrată: ${worker} - ${action}`);
+            updateAttendanceTable();
+            updateHoursWorkedTable();
+        }
+
+        function updateAttendanceTable() {
+            const tableBody = document.querySelector('#attendanceTable tbody');
+            tableBody.innerHTML = '';
+            attendanceData.forEach(record => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = record.worker;
+                row.insertCell(1).textContent = record.action;
+                row.insertCell(2).textContent = record.timestamp;
+            });
+        }
+
+        function accessAdminPanel() {
+            const password = prompt("Introduceți parola de admin:");
+            if (password === '1309') {
+                document.getElementById('adminPanel').style.display = 'block';
+                updateAttendanceTable();
+                updateHoursWorkedTable();
+            } else {
+                alert('Parolă incorectă');
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function addWorker() {
+            const newWorker = document.getElementById('newWorker').value.trim();
+            if (newWorker && !workers.includes(newWorker)) {
+                workers.push(newWorker);
+                localStorage.setItem('workers', JSON.stringify(workers));
+                updateWorkerSelects();
+                document.getElementById('newWorker').value = '';
+                alert(`Lucrătorul ${newWorker} a fost adăugat.`);
+            } else {
+                alert('Numele lucrătorului este invalid sau există deja.');
+            }
+        }
+
+        function removeWorker() {
+            const workerToRemove = document.getElementById('workerToRemove').value;
+            if (workerToRemove && confirm(`Sigur doriți să ștergeți lucrătorul ${workerToRemove}?`)) {
+                workers = workers.filter(w => w !== workerToRemove);
+                localStorage.setItem('workers', JSON.stringify(workers));
+                attendanceData = attendanceData.filter(record => record.worker !== workerToRemove);
+                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+                updateWorkerSelects();
+                updateAttendanceTable();
+                updateHoursWorkedTable();
+                alert(`Lucrătorul ${workerToRemove} a fost șters.`);
+            }
+        }
+
+        function downloadCSV() {
+            let csv = 'Nume,Acțiune,Data și Ora\n';
+            attendanceData.forEach(record => {
+                csv += `${record.worker},${record.action},${record.timestamp}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'pontaj.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        function updateHoursWorkedTable() {
+            const currentDate = new Date();
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
+
+            const workerHours = {};
+
+            attendanceData.forEach(record => {
+                const recordDate = new Date(record.timestamp);
+                if (recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear) {
+                    if (!workerHours[record.worker]) {
+                        workerHours[record.worker] = { lastEntry: null, totalHours: 0 };
+                    }
+
+                    if (record.action === 'Am Venit') {
+                        workerHours[record.worker].lastEntry = recordDate;
+                    } else if (record.action === 'Am Ieșit' && workerHours[record.worker].lastEntry) {
+                        const hoursWorked = (recordDate - workerHours[record.worker].lastEntry) / (1000 * 60 * 60);
+                        workerHours[record.worker].totalHours += hoursWorked;
+                        workerHours[record.worker].lastEntry = null;
+                    }
+                }
+            });
+
+            const tableBody = document.querySelector('#hoursWorkedTable tbody');
+            tableBody.innerHTML = '';
+            for (const [worker, data] of Object.entries(workerHours)) {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = worker;
+                row.insertCell(1).textContent = data.totalHours.toFixed(2);
+            }
+        }
+
+        updateWorkerSelects();
+        updateAttendanceTable();
+        updateHoursWorkedTable();
+    </script>
+</body>
+</html>
