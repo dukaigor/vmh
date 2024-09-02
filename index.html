@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema di registrazione presenze sincronizzato</title>
+    <title>Sistema di registrazione presenze avanzato</title>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
@@ -13,7 +13,7 @@
             background-color: #2D2D2C; 
             color: #fff;
         }
-        select, button, input { 
+        select, button, input, textarea { 
             margin: 10px 0; 
             padding: 10px 15px; 
             background-color: #3D3D3C; 
@@ -22,7 +22,7 @@
             border-radius: 8px;
             font-size: 16px;
         }
-        select {
+        select, textarea {
             width: 100%;
             max-width: 300px;
         }
@@ -85,13 +85,13 @@
             font-weight: bold;
         }
     </style>
-    <!-- Importăm Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <div class="main-controls">
         <select id="worker" name="worker"></select>
+        <textarea id="note" placeholder="Aggiungi una nota (opzionale)"></textarea>
         <div class="action-buttons">
             <button id="entrataBtn" onclick="recordAttendance('Entrata')">ENTRATA</button>
             <button id="uscitaBtn" onclick="recordAttendance('Uscita')">USCITA</button>
@@ -118,6 +118,7 @@
                     <th>Nome</th>
                     <th>Azione</th>
                     <th>Data e Ora</th>
+                    <th>Nota</th>
                     <th>Azioni</th>
                 </tr>
             </thead>
@@ -140,17 +141,16 @@
     <img id="logo" src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%202024-07-08%20%D0%B2%2017.39.20-ZoYKfLDx1Dk5H5AP2lXNvUbWo9Ifdi.png" alt="Valery Mystic Hair Logo">
 
     <script>
-        // Configurația Firebase (înlocuiți cu propriile date de configurare)
         const firebaseConfig = {
-  apiKey: "AIzaSyA6E5Xn5RvZViYJW-hxh3pn8w1ALDZpOb4",
-  authDomain: "https://vmh-tracker-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "vmh-tracker",
-  storageBucket: "vmh-tracker.appspot.com",
-  messagingSenderId: "1036108389148",
-  appId: "1:1036108389148:web:2add2da83a2759913138d9"
-};
+            apiKey: "AIzaSyA6E5Xn5RvZViYJW-hxh3pn8w1ALDZpOb4",
+            authDomain: "vmh-tracker.firebaseapp.com",
+            databaseURL: "https://vmh-tracker-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "vmh-tracker",
+            storageBucket: "vmh-tracker.appspot.com",
+            messagingSenderId: "1036108389148",
+            appId: "1:1036108389148:web:2add2da83a2759913138d9"
+        };
 
-        // Inițializăm Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -170,6 +170,7 @@
 
         function recordAttendance(action) {
             const worker = document.getElementById('worker').value;
+            const note = document.getElementById('note').value;
             const timestamp = new Date().toLocaleString('it-IT', {
                 day: '2-digit',
                 month: '2-digit',
@@ -178,20 +179,22 @@
                 minute: '2-digit',
                 second: '2-digit'
             });
-            const newRecord = { worker, action, timestamp };
+            const newRecord = { worker, action, timestamp, note };
             database.ref('attendance').push(newRecord);
             alert(`Azione registrata: ${worker} - ${action}`);
+            document.getElementById('note').value = '';
         }
 
         function updateAttendanceTable() {
             const tableBody = document.querySelector('#attendanceTable tbody');
             tableBody.innerHTML = '';
-            attendanceData.forEach((record, index) => {
+            attendanceData.forEach((record) => {
                 const row = tableBody.insertRow();
                 row.insertCell(0).textContent = record.worker;
                 row.insertCell(1).textContent = record.action;
                 row.insertCell(2).textContent = record.timestamp;
-                const deleteCell = row.insertCell(3);
+                row.insertCell(3).textContent = record.note || '';
+                const deleteCell = row.insertCell(4);
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Elimina';
                 deleteButton.className = 'deleteRowBtn';
@@ -255,9 +258,9 @@
         }
 
         function downloadCSV() {
-            let csv = 'Nome,Azione,Data e Ora\n';
+            let csv = 'Nome,Azione,Data e Ora,Nota\n';
             attendanceData.forEach(record => {
-                csv += `"${record.worker}","${record.action}","${record.timestamp}"\n`;
+                csv += `"${record.worker}","${record.action}","${record.timestamp}","${record.note || ''}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -308,13 +311,11 @@
             }
         }
 
-        // Ascultăm modificările în baza de date pentru lucrători
         database.ref('workers').on('value', snapshot => {
             workers = snapshot.val() ? Object.values(snapshot.val()) : [];
             updateWorkerSelects();
         });
 
-        // Ascultăm modificările în baza de date pentru prezențe
         database.ref('attendance').on('value', snapshot => {
             attendanceData = snapshot.val() ? Object.entries(snapshot.val()).map(([id, data]) => ({id, ...data})) : [];
             updateAttendanceTable();
