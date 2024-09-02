@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema di registrazione presenze</title>
+    <title>Sistema di registrazione presenze sincronizzato</title>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
@@ -85,6 +85,9 @@
             font-weight: bold;
         }
     </style>
+    <!-- Importăm Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
     <div class="main-controls">
@@ -137,8 +140,23 @@
     <img id="logo" src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%202024-07-08%20%D0%B2%2017.39.20-ZoYKfLDx1Dk5H5AP2lXNvUbWo9Ifdi.png" alt="Valery Mystic Hair Logo">
 
     <script>
-        let workers = ['Olesea', 'Martina', 'Cristina', 'Veronica', 'Inga', 'Vlada'];
-        let attendanceData = JSON.parse(localStorage.getItem('attendanceData')) || [];
+        // Configurația Firebase (înlocuiți cu propriile date de configurare)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6E5Xn5RvZViYJW-hxh3pn8w1ALDZpOb4",
+            authDomain: "vmh-tracker.firebaseapp.com",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "vmh-tracker",
+            storageBucket: "vmh-tracker.appspot.com",
+            messagingSenderId: "1036108389148",
+            appId: "1:1036108389148:web:2add2da83a2759913138d9"
+        };
+
+        // Inițializăm Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let workers = [];
+        let attendanceData = [];
 
         function updateWorkerSelects() {
             const workerSelect = document.getElementById('worker');
@@ -161,11 +179,9 @@
                 minute: '2-digit',
                 second: '2-digit'
             });
-            attendanceData.push({ worker, action, timestamp });
-            localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+            const newRecord = { worker, action, timestamp };
+            database.ref('attendance').push(newRecord);
             alert(`Azione registrata: ${worker} - ${action}`);
-            updateAttendanceTable();
-            updateHoursWorkedTable();
         }
 
         function updateAttendanceTable() {
@@ -180,26 +196,20 @@
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Elimina';
                 deleteButton.className = 'deleteRowBtn';
-                deleteButton.onclick = () => deleteRow(index);
+                deleteButton.onclick = () => deleteRow(record.id);
                 deleteCell.appendChild(deleteButton);
             });
         }
 
-        function deleteRow(index) {
+        function deleteRow(id) {
             if (confirm('Sei sicuro di voler eliminare questa riga?')) {
-                attendanceData.splice(index, 1);
-                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
-                updateAttendanceTable();
-                updateHoursWorkedTable();
+                database.ref('attendance').child(id).remove();
             }
         }
 
         function deleteAllData() {
             if (confirm('Sei sicuro di voler eliminare tutti i dati? Questa azione non può essere annullata.')) {
-                attendanceData = [];
-                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
-                updateAttendanceTable();
-                updateHoursWorkedTable();
+                database.ref('attendance').remove();
                 alert('Tutti i dati sono stati eliminati.');
             }
         }
@@ -222,9 +232,7 @@
         function addWorker() {
             const newWorker = document.getElementById('newWorker').value.trim();
             if (newWorker && !workers.includes(newWorker)) {
-                workers.push(newWorker);
-                localStorage.setItem('workers', JSON.stringify(workers));
-                updateWorkerSelects();
+                database.ref('workers').push(newWorker);
                 document.getElementById('newWorker').value = '';
                 alert(`Il lavoratore ${newWorker} è stato aggiunto.`);
             } else {
@@ -235,13 +243,14 @@
         function removeWorker() {
             const workerToRemove = document.getElementById('workerToRemove').value;
             if (workerToRemove && confirm(`Sei sicuro di voler rimuovere il lavoratore ${workerToRemove}?`)) {
-                workers = workers.filter(w => w !== workerToRemove);
-                localStorage.setItem('workers', JSON.stringify(workers));
-                attendanceData = attendanceData.filter(record => record.worker !== workerToRemove);
-                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
-                updateWorkerSelects();
-                updateAttendanceTable();
-                updateHoursWorkedTable();
+                const workerRef = database.ref('workers');
+                workerRef.once('value', snapshot => {
+                    snapshot.forEach(childSnapshot => {
+                        if (childSnapshot.val() === workerToRemove) {
+                            childSnapshot.ref.remove();
+                        }
+                    });
+                });
                 alert(`Il lavoratore ${workerToRemove} è stato rimosso.`);
             }
         }
@@ -300,9 +309,18 @@
             }
         }
 
-        updateWorkerSelects();
-        updateAttendanceTable();
-        updateHoursWorkedTable();
+        // Ascultăm modificările în baza de date pentru lucrători
+        database.ref('workers').on('value', snapshot => {
+            workers = snapshot.val() ? Object.values(snapshot.val()) : [];
+            updateWorkerSelects();
+        });
+
+        // Ascultăm modificările în baza de date pentru prezențe
+        database.ref('attendance').on('value', snapshot => {
+            attendanceData = snapshot.val() ? Object.entries(snapshot.val()).map(([id, data]) => ({id, ...data})) : [];
+            updateAttendanceTable();
+            updateHoursWorkedTable();
+        });
     </script>
 </body>
 </html>
