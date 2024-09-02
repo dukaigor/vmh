@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ro">
+<html lang="it">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem de pontaj - Valery Mystic Hair</title>
+    <title>Sistema di registrazione presenze</title>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
@@ -86,46 +86,45 @@
     </style>
 </head>
 <body>
-    <h1>Sistem de pontaj - Valery Mystic Hair</h1>
-    
     <div class="main-controls">
         <select id="worker" name="worker"></select>
         <div class="action-buttons">
-            <button onclick="recordAttendance('Am Venit')">Am Venit</button>
-            <button onclick="recordAttendance('Am Ieșit')">Am Ieșit</button>
+            <button onclick="recordAttendance('Entrata')">Entrata</button>
+            <button onclick="recordAttendance('Uscita')">Uscita</button>
         </div>
     </div>
     
-    <button id="accessAdminBtn" onclick="accessAdminPanel()">Acces Admin</button>
+    <button id="accessAdminBtn" onclick="accessAdminPanel()">Accesso Admin</button>
     
     <div id="adminPanel">
-        <button id="closeAdminBtn" onclick="closeAdminPanel()">Închide Panou Admin</button>
-        <h3>Panou de administrare</h3>
-        <input type="text" id="newWorker" placeholder="Nume lucrător nou">
-        <button onclick="addWorker()">Adaugă lucrător</button>
+        <button id="closeAdminBtn" onclick="closeAdminPanel()">Chiudi Pannello Admin</button>
+        <h3>Pannello di amministrazione</h3>
+        <input type="text" id="newWorker" placeholder="Nome nuovo lavoratore">
+        <button onclick="addWorker()">Aggiungi lavoratore</button>
         <br>
         <select id="workerToRemove"></select>
-        <button onclick="removeWorker()">Șterge lucrător</button>
+        <button onclick="removeWorker()">Rimuovi lavoratore</button>
         <br>
-        <button onclick="downloadCSV()">Descarcă tabel (CSV)</button>
+        <button onclick="downloadCSV()">Scarica tabella (CSV)</button>
         
         <table id="attendanceTable">
             <thead>
                 <tr>
-                    <th>Nume</th>
-                    <th>Acțiune</th>
-                    <th>Data și Ora</th>
+                    <th>Nome</th>
+                    <th>Azione</th>
+                    <th>Data e Ora</th>
                 </tr>
             </thead>
             <tbody></tbody>
         </table>
 
-        <h3>Ore lucrate pe lună</h3>
+        <h3>Ore lavorate per mese</h3>
         <table id="hoursWorkedTable">
             <thead>
                 <tr>
-                    <th>Nume</th>
-                    <th>Ore lucrate</th>
+                    <th>Nome</th>
+                    <th>Mese</th>
+                    <th>Ore lavorate</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -151,10 +150,10 @@
 
         function recordAttendance(action) {
             const worker = document.getElementById('worker').value;
-            const timestamp = new Date().toLocaleString('ro-RO');
+            const timestamp = new Date().toLocaleString('it-IT');
             attendanceData.push({ worker, action, timestamp });
             localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
-            alert(`Acțiune înregistrată: ${worker} - ${action}`);
+            alert(`Azione registrata: ${worker} - ${action}`);
             updateAttendanceTable();
             updateHoursWorkedTable();
         }
@@ -171,13 +170,13 @@
         }
 
         function accessAdminPanel() {
-            const password = prompt("Introduceți parola de admin:");
+            const password = prompt("Inserisci la password di admin:");
             if (password === '1309') {
                 document.getElementById('adminPanel').style.display = 'block';
                 updateAttendanceTable();
                 updateHoursWorkedTable();
             } else {
-                alert('Parolă incorectă');
+                alert('Password non corretta');
             }
         }
 
@@ -192,15 +191,15 @@
                 localStorage.setItem('workers', JSON.stringify(workers));
                 updateWorkerSelects();
                 document.getElementById('newWorker').value = '';
-                alert(`Lucrătorul ${newWorker} a fost adăugat.`);
+                alert(`Il lavoratore ${newWorker} è stato aggiunto.`);
             } else {
-                alert('Numele lucrătorului este invalid sau există deja.');
+                alert('Il nome del lavoratore non è valido o esiste già.');
             }
         }
 
         function removeWorker() {
             const workerToRemove = document.getElementById('workerToRemove').value;
-            if (workerToRemove && confirm(`Sigur doriți să ștergeți lucrătorul ${workerToRemove}?`)) {
+            if (workerToRemove && confirm(`Sei sicuro di voler rimuovere il lavoratore ${workerToRemove}?`)) {
                 workers = workers.filter(w => w !== workerToRemove);
                 localStorage.setItem('workers', JSON.stringify(workers));
                 attendanceData = attendanceData.filter(record => record.worker !== workerToRemove);
@@ -208,21 +207,21 @@
                 updateWorkerSelects();
                 updateAttendanceTable();
                 updateHoursWorkedTable();
-                alert(`Lucrătorul ${workerToRemove} a fost șters.`);
+                alert(`Il lavoratore ${workerToRemove} è stato rimosso.`);
             }
         }
 
         function downloadCSV() {
-            let csv = 'Nume,Acțiune,Data și Ora\n';
+            let csv = 'Nome,Azione,Data e Ora\n';
             attendanceData.forEach(record => {
-                csv += `${record.worker},${record.action},${record.timestamp}\n`;
+                csv += `"${record.worker}","${record.action}","${record.timestamp}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             if (link.download !== undefined) {
                 const url = URL.createObjectURL(blob);
                 link.setAttribute('href', url);
-                link.setAttribute('download', 'pontaj.csv');
+                link.setAttribute('download', 'registro_presenze.csv');
                 link.style.visibility = 'hidden';
                 document.body.appendChild(link);
                 link.click();
@@ -231,35 +230,37 @@
         }
 
         function updateHoursWorkedTable() {
-            const currentDate = new Date();
-            const currentMonth = currentDate.getMonth();
-            const currentYear = currentDate.getFullYear();
-
             const workerHours = {};
 
             attendanceData.forEach(record => {
                 const recordDate = new Date(record.timestamp);
-                if (recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear) {
-                    if (!workerHours[record.worker]) {
-                        workerHours[record.worker] = { lastEntry: null, totalHours: 0 };
-                    }
+                const monthYear = `${recordDate.getMonth() + 1}/${recordDate.getFullYear()}`;
+                
+                if (!workerHours[record.worker]) {
+                    workerHours[record.worker] = {};
+                }
+                if (!workerHours[record.worker][monthYear]) {
+                    workerHours[record.worker][monthYear] = { lastEntry: null, totalHours: 0 };
+                }
 
-                    if (record.action === 'Am Venit') {
-                        workerHours[record.worker].lastEntry = recordDate;
-                    } else if (record.action === 'Am Ieșit' && workerHours[record.worker].lastEntry) {
-                        const hoursWorked = (recordDate - workerHours[record.worker].lastEntry) / (1000 * 60 * 60);
-                        workerHours[record.worker].totalHours += hoursWorked;
-                        workerHours[record.worker].lastEntry = null;
-                    }
+                if (record.action === 'Entrata') {
+                    workerHours[record.worker][monthYear].lastEntry = recordDate;
+                } else if (record.action === 'Uscita' && workerHours[record.worker][monthYear].lastEntry) {
+                    const hoursWorked = (recordDate - workerHours[record.worker][monthYear].lastEntry) / (1000 * 60 * 60);
+                    workerHours[record.worker][monthYear].totalHours += hoursWorked;
+                    workerHours[record.worker][monthYear].lastEntry = null;
                 }
             });
 
             const tableBody = document.querySelector('#hoursWorkedTable tbody');
             tableBody.innerHTML = '';
-            for (const [worker, data] of Object.entries(workerHours)) {
-                const row = tableBody.insertRow();
-                row.insertCell(0).textContent = worker;
-                row.insertCell(1).textContent = data.totalHours.toFixed(2);
+            for (const [worker, months] of Object.entries(workerHours)) {
+                for (const [month, data] of Object.entries(months)) {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = worker;
+                    row.insertCell(1).textContent = month;
+                    row.insertCell(2).textContent = data.totalHours.toFixed(2);
+                }
             }
         }
 
