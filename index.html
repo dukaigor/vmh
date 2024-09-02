@@ -2,42 +2,57 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema di registrazione presenze avanzato</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VMH Tracker">
+    <link rel="apple-touch-icon" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%202024-07-08%20%D0%B2%2017.39.20-ZoYKfLDx1Dk5H5AP2lXNvUbWo9Ifdi.png">
+    <title>VMH Tracker</title>
     <style>
+        :root {
+            --primary-bg: #2D2D2C;
+            --secondary-bg: #3D3D3C;
+            --text-color: #fff;
+            --button-green: #34C759;
+            --button-red: #FF3B30;
+        }
+        * {
+            box-sizing: border-box;
+        }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            background-color: #2D2D2C; 
-            color: #fff;
+            max-width: 100%;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
         }
         select, button, input, textarea { 
+            width: 100%;
             margin: 10px 0; 
-            padding: 10px 15px; 
-            background-color: #3D3D3C; 
-            color: #fff; 
+            padding: 15px;
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
             border: none;
             border-radius: 8px;
             font-size: 16px;
-        }
-        select, textarea {
-            width: 100%;
-            max-width: 300px;
+            appearance: none;
         }
         button {
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.1s;
         }
         button:hover {
             background-color: #4D4D4C;
+        }
+        button:active {
+            transform: scale(0.98);
         }
         table { 
             width: 100%; 
             border-collapse: collapse; 
             margin-top: 20px; 
-            background-color: #3D3D3C;
+            background-color: var(--secondary-bg);
             border-radius: 8px;
             overflow: hidden;
         }
@@ -51,14 +66,14 @@
         }
         #adminPanel { 
             display: none; 
-            background-color: #3D3D3C;
+            background-color: var(--secondary-bg);
             padding: 20px;
             border-radius: 8px;
             margin-top: 20px;
         }
         #logo {
             width: 100%;
-            max-width: 400px;
+            max-width: 200px;
             margin: 20px auto;
             display: block;
         }
@@ -72,17 +87,36 @@
             display: flex;
             gap: 10px;
             margin-top: 20px;
+            width: 100%;
         }
         #accessAdminBtn, #closeAdminBtn, #deleteAllDataBtn, .deleteRowBtn, #downloadCSVBtn {
-            background-color: #FF3B30;
+            background-color: var(--button-red);
         }
         #entrataBtn {
-            background-color: #34C759;
+            background-color: var(--button-green);
             font-weight: bold;
         }
         #uscitaBtn {
-            background-color: #FF3B30;
+            background-color: var(--button-red);
             font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            select, button, input, textarea {
+                font-size: 14px;
+                padding: 12px;
+            }
+            table {
+                font-size: 12px;
+            }
+            th, td {
+                padding: 8px;
+            }
+            #logo {
+                max-width: 150px;
+            }
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
