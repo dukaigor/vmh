@@ -73,15 +73,16 @@
             gap: 10px;
             margin-top: 20px;
         }
-        #accessAdminBtn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
+        #accessAdminBtn, #closeAdminBtn, #deleteAllDataBtn, .deleteRowBtn, #downloadCSVBtn {
             background-color: #FF3B30;
         }
-        #closeAdminBtn {
+        #entrataBtn {
+            background-color: #34C759;
+            font-weight: bold;
+        }
+        #uscitaBtn {
             background-color: #FF3B30;
-            margin-bottom: 20px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -89,8 +90,8 @@
     <div class="main-controls">
         <select id="worker" name="worker"></select>
         <div class="action-buttons">
-            <button onclick="recordAttendance('Entrata')">Entrata</button>
-            <button onclick="recordAttendance('Uscita')">Uscita</button>
+            <button id="entrataBtn" onclick="recordAttendance('Entrata')">ENTRATA</button>
+            <button id="uscitaBtn" onclick="recordAttendance('Uscita')">USCITA</button>
         </div>
     </div>
     
@@ -105,7 +106,8 @@
         <select id="workerToRemove"></select>
         <button onclick="removeWorker()">Rimuovi lavoratore</button>
         <br>
-        <button onclick="downloadCSV()">Scarica tabella (CSV)</button>
+        <button id="downloadCSVBtn" onclick="downloadCSV()">Scarica tabella (CSV)</button>
+        <button id="deleteAllDataBtn" onclick="deleteAllData()">Elimina tutti i dati</button>
         
         <table id="attendanceTable">
             <thead>
@@ -113,6 +115,7 @@
                     <th>Nome</th>
                     <th>Azione</th>
                     <th>Data e Ora</th>
+                    <th>Azioni</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -150,7 +153,14 @@
 
         function recordAttendance(action) {
             const worker = document.getElementById('worker').value;
-            const timestamp = new Date().toLocaleString('it-IT');
+            const timestamp = new Date().toLocaleString('it-IT', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
             attendanceData.push({ worker, action, timestamp });
             localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
             alert(`Azione registrata: ${worker} - ${action}`);
@@ -161,12 +171,37 @@
         function updateAttendanceTable() {
             const tableBody = document.querySelector('#attendanceTable tbody');
             tableBody.innerHTML = '';
-            attendanceData.forEach(record => {
+            attendanceData.forEach((record, index) => {
                 const row = tableBody.insertRow();
                 row.insertCell(0).textContent = record.worker;
                 row.insertCell(1).textContent = record.action;
                 row.insertCell(2).textContent = record.timestamp;
+                const deleteCell = row.insertCell(3);
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Elimina';
+                deleteButton.className = 'deleteRowBtn';
+                deleteButton.onclick = () => deleteRow(index);
+                deleteCell.appendChild(deleteButton);
             });
+        }
+
+        function deleteRow(index) {
+            if (confirm('Sei sicuro di voler eliminare questa riga?')) {
+                attendanceData.splice(index, 1);
+                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+                updateAttendanceTable();
+                updateHoursWorkedTable();
+            }
+        }
+
+        function deleteAllData() {
+            if (confirm('Sei sicuro di voler eliminare tutti i dati? Questa azione non può essere annullata.')) {
+                attendanceData = [];
+                localStorage.setItem('attendanceData', JSON.stringify(attendanceData));
+                updateAttendanceTable();
+                updateHoursWorkedTable();
+                alert('Tutti i dati sono stati eliminati.');
+            }
         }
 
         function accessAdminPanel() {
@@ -233,8 +268,8 @@
             const workerHours = {};
 
             attendanceData.forEach(record => {
-                const recordDate = new Date(record.timestamp);
-                const monthYear = `${recordDate.getMonth() + 1}/${recordDate.getFullYear()}`;
+                const [day, month, year] = record.timestamp.split(', ')[0].split('/');
+                const monthYear = `${day}.${month}.${year}`;
                 
                 if (!workerHours[record.worker]) {
                     workerHours[record.worker] = {};
@@ -244,9 +279,10 @@
                 }
 
                 if (record.action === 'Entrata') {
-                    workerHours[record.worker][monthYear].lastEntry = recordDate;
+                    workerHours[record.worker][monthYear].lastEntry = new Date(record.timestamp);
                 } else if (record.action === 'Uscita' && workerHours[record.worker][monthYear].lastEntry) {
-                    const hoursWorked = (recordDate - workerHours[record.worker][monthYear].lastEntry) / (1000 * 60 * 60);
+                    const exitTime = new Date(record.timestamp);
+                    const hoursWorked = (exitTime - workerHours[record.worker][monthYear].lastEntry) / (1000 * 60 * 60);
                     workerHours[record.worker][monthYear].totalHours += hoursWorked;
                     workerHours[record.worker][monthYear].lastEntry = null;
                 }
