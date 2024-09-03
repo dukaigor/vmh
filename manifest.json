@@ -1,7 +1,7 @@
 {
   "name": "VMH Tracker",
-  "short_name": "VMH",
-  "description": "Valery Mystic Hair Attendance Tracker",
+  "short_name": "VMH Tracker",
+  "description": "Sistema di registrazione presenze per Valery Mystic Hair",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#2D2D2C",
