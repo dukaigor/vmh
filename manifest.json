@@ -1,6 +1,6 @@
 {
   "name": "VMH Tracker",
-  "short_name": "VMH Tracker",
+  "short_name": "VMH",
   "description": "Sistema di registrazione presenze per Valery Mystic Hair",
   "start_url": "/",
   "display": "standalone",
