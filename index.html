@@ -51,22 +51,6 @@
         button:active {
             transform: scale(0.98);
         }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 20px; 
-            background-color: var(--secondary-bg);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        th, td { 
-            border: 1px solid #4D4D4C; 
-            padding: 12px; 
-            text-align: left; 
-        }
-        th { 
-            background-color: #4D4D4C; 
-        }
         #adminPanel { 
             display: none; 
             background-color: #fff;
@@ -85,6 +69,23 @@
         }
         #adminPanel button {
             color: #fff;
+        }
+        #adminPanel table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background-color: #fff;
+            color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #adminPanel th, #adminPanel td { 
+            border: 1px solid #ccc; 
+            padding: 12px; 
+            text-align: left; 
+        }
+        #adminPanel th { 
+            background-color: #f0f0f0; 
         }
         #logo {
             width: 100%;
@@ -126,10 +127,10 @@
                 font-size: 14px;
                 padding: 12px;
             }
-            table {
+            #adminPanel table {
                 font-size: 12px;
             }
-            th, td {
+            #adminPanel th, #adminPanel td {
                 padding: 8px;
             }
             #logo {
@@ -354,8 +355,8 @@
             const action = document.getElementById('manualEntryAction').value;
             const note = document.getElementById('manualEntryNote').value;
 
-            if (!worker || !dateTime) {
-                alert('Seleziona un lavoratore e inserisci una data e ora valida.');
+            if (!worker || !dateTime)  {
+                alert('Per favore, compila tutti i campi obbligatori.');
                 return;
             }
 
@@ -370,7 +371,10 @@
 
             const newRecord = { worker, action, timestamp, note };
             database.ref('attendance').push(newRecord);
-            alert(`Inserimento manuale registrato: ${worker} - ${action} - ${timestamp}`);
+            alert('Registrazione manuale inserita con successo.');
+
+            // Reset form
+            document.getElementById('manualEntryDateTime').value = '';
             document.getElementById('manualEntryNote').value = '';
         }
 
@@ -397,7 +401,7 @@
 
             attendanceData.forEach(record => {
                 const [day, month, year] = record.timestamp.split(', ')[0].split('/');
-                const monthYear = `${day}.${month}.${year}`;
+                const monthYear = `${month}/${year}`;
                 
                 if (!workerHours[record.worker]) {
                     workerHours[record.worker] = {};
