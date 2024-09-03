@@ -15,6 +15,7 @@
             --text-color: #fff;
             --button-green: #34C759;
             --button-red: #FF3B30;
+            --button-blue: #007AFF;
         }
         * {
             box-sizing: border-box;
@@ -100,6 +101,9 @@
             background-color: var(--button-red);
             font-weight: bold;
         }
+        .editBtn, .manualEntryBtn {
+            background-color: var(--button-blue);
+        }
         @media (max-width: 600px) {
             body {
                 padding: 10px;
@@ -140,8 +144,22 @@
         <input type="text" id="newWorker" placeholder="Nome nuovo lavoratore">
         <button onclick="addWorker()">Aggiungi lavoratore</button>
         <br>
+        <select id="workerToEdit"></select>
+        <input type="text" id="newWorkerName" placeholder="Nuovo nome del lavoratore">
+        <button onclick="editWorker()">Modifica nome lavoratore</button>
+        <br>
         <select id="workerToRemove"></select>
         <button onclick="removeWorker()">Rimuovi lavoratore</button>
+        <br>
+        <h4>Inserimento manuale</h4>
+        <select id="workerForManualEntry"></select>
+        <input type="datetime-local" id="manualEntryDateTime">
+        <select id="manualEntryAction">
+            <option value="Entrata">Entrata</option>
+            <option value="Uscita">Uscita</option>
+        </select>
+        <textarea id="manualEntryNote" placeholder="Nota (opzionale)"></textarea>
+        <button onclick="manualEntry()" class="manualEntryBtn">Inserisci manualmente</button>
         <br>
         <button id="downloadCSVBtn" onclick="downloadCSV()">Scarica tabella (CSV)</button>
         <button id="deleteAllDataBtn" onclick="deleteAllData()">Elimina tutti i dati</button>
@@ -192,13 +210,13 @@
         let attendanceData = [];
 
         function updateWorkerSelects() {
-            const workerSelect = document.getElementById('worker');
-            const workerToRemoveSelect = document.getElementById('workerToRemove');
-            workerSelect.innerHTML = '';
-            workerToRemoveSelect.innerHTML = '';
-            workers.forEach(worker => {
-                workerSelect.add(new Option(worker, worker));
-                workerToRemoveSelect.add(new Option(worker, worker));
+            const workerSelects = ['worker', 'workerToEdit', 'workerToRemove', 'workerForManualEntry'];
+            workerSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '';
+                workers.forEach(worker => {
+                    select.add(new Option(worker, worker));
+                });
             });
         }
 
@@ -276,6 +294,31 @@
             }
         }
 
+        function editWorker() {
+            const workerToEdit = document.getElementById('workerToEdit').value;
+            const newName = document.getElementById('newWorkerName').value.trim();
+            if (newName && newName !== workerToEdit) {
+                const workerRef = database.ref('workers');
+                workerRef.once('value', snapshot => {
+                    snapshot.forEach(childSnapshot => {
+                        if (childSnapshot.val() === workerToEdit) {
+                            childSnapshot.ref.set(newName);
+                            // Update attendance records
+                            database.ref('attendance').orderByChild('worker').equalTo(workerToEdit).once('value', attendanceSnapshot => {
+                                attendanceSnapshot.forEach(record => {
+                                    record.ref.update({ worker: newName });
+                                });
+                            });
+                            alert(`Il nome del lavoratore è stato modificato da ${workerToEdit} a ${newName}.`);
+                        }
+                    });
+                });
+                document.getElementById('newWorkerName').value = '';
+            } else {
+                alert('Il nuovo nome non è valido o è uguale al nome attuale.');
+            }
+        }
+
         function removeWorker() {
             const workerToRemove = document.getElementById('workerToRemove').value;
             if (workerToRemove && confirm(`Sei sicuro di voler rimuovere il lavoratore ${workerToRemove}?`)) {
@@ -289,6 +332,32 @@
                 });
                 alert(`Il lavoratore ${workerToRemove} è stato rimosso.`);
             }
+        }
+
+        function manualEntry() {
+            const worker = document.getElementById('workerForManualEntry').value;
+            const dateTime = document.getElementById('manualEntryDateTime').value;
+            const action = document.getElementById('manualEntryAction').value;
+            const note = document.getElementById('manualEntryNote').value;
+
+            if (!worker || !dateTime) {
+                alert('Seleziona un lavoratore e inserisci una data e ora valida.');
+                return;
+            }
+
+            const timestamp = new Date(dateTime).toLocaleString('it-IT', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            const newRecord = { worker, action, timestamp, note };
+            database.ref('attendance').push(newRecord);
+            alert(`Inserimento manuale registrato: ${worker} - ${action} - ${timestamp}`);
+            document.getElementById('manualEntryNote').value = '';
         }
 
         function downloadCSV() {
