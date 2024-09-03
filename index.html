@@ -237,10 +237,20 @@
             });
         }
 
+        function checkDuplicateAction(worker, action, currentDate) {
+            const todayEntries = attendanceData.filter(record => 
+                record.worker === worker && 
+                record.action === action && 
+                new Date(record.timestamp).toDateString() === currentDate.toDateString()
+            );
+            return todayEntries.length > 0;
+        }
+
         function recordAttendance(action) {
             const worker = document.getElementById('worker').value;
             const note = document.getElementById('note').value;
-            const timestamp = new Date().toLocaleString('it-IT', {
+            const currentDate = new Date();
+            const timestamp = currentDate.toLocaleString('it-IT', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',
@@ -248,6 +258,12 @@
                 minute: '2-digit',
                 second: '2-digit'
             });
+
+            if (checkDuplicateAction(worker, action, currentDate)) {
+                alert(`Attenzione: ${worker} ha già registrato un'azione di ${action} oggi.`);
+                return;
+            }
+
             const newRecord = { worker, action, timestamp, note };
             database.ref('attendance').push(newRecord);
             alert(`Azione registrata: ${worker} - ${action}`);
@@ -354,8 +370,7 @@
         function manualEntry() {
             const worker = document.getElementById('workerForManualEntry').value;
             const dateTime = document.getElementById('manualEntryDateTime').value;
-            const action =
- document.getElementById('manualEntryAction').value;
+            const action = document.getElementById('manualEntryAction').value;
             const note = document.getElementById('manualEntryNote').value;
 
             if (!worker || !dateTime)  {
@@ -363,7 +378,13 @@
                 return;
             }
 
-            const timestamp = new Date(dateTime).toLocaleString('it-IT', {
+            const entryDate = new Date(dateTime);
+            if (checkDuplicateAction(worker, action, entryDate)) {
+                alert(`Attenzione: ${worker} ha già registrato un'azione di ${action} in questa data.`);
+                return;
+            }
+
+            const timestamp = entryDate.toLocaleString('it-IT', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric',
