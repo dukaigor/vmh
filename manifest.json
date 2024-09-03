@@ -1,0 +1,23 @@
+{
+  "name": "VMH Tracker",
+  "short_name": "VMH",
+  "description": "Sistema di registrazione presenze per Valery Mystic Hair",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#2D2D2C",
+  "theme_color": "#2D2D2C",
+  "icons": [
+    {
+      "src": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
