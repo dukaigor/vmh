@@ -104,6 +104,29 @@
         .editBtn, .manualEntryBtn {
             background-color: var(--button-blue);
         }
+        /* Stiluri noi pentru secțiunea de introducere manuală */
+        .manual-entry-section {
+            background-color: #fff;
+            color: #000;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .manual-entry-section h4 {
+            color: #000;
+            margin-top: 0;
+        }
+        .manual-entry-section select,
+        .manual-entry-section input,
+        .manual-entry-section textarea {
+            background-color: #f0f0f0;
+            color: #000;
+            border: 1px solid #ccc;
+        }
+        .manual-entry-section button {
+            background-color: var(--button-blue);
+            color: #fff;
+        }
         @media (max-width: 600px) {
             body {
                 padding: 10px;
@@ -151,15 +174,17 @@
         <select id="workerToRemove"></select>
         <button onclick="removeWorker()">Rimuovi lavoratore</button>
         <br>
-        <h4>Inserimento manuale</h4>
-        <select id="workerForManualEntry"></select>
-        <input type="datetime-local" id="manualEntryDateTime">
-        <select id="manualEntryAction">
-            <option value="Entrata">Entrata</option>
-            <option value="Uscita">Uscita</option>
-        </select>
-        <textarea id="manualEntryNote" placeholder="Nota (opzionale)"></textarea>
-        <button onclick="manualEntry()" class="manualEntryBtn">Inserisci manualmente</button>
+        <div class="manual-entry-section">
+            <h4>Inserimento manuale</h4>
+            <select id="workerForManualEntry"></select>
+            <input type="datetime-local" id="manualEntryDateTime">
+            <select id="manualEntryAction">
+                <option value="Entrata">Entrata</option>
+                <option value="Uscita">Uscita</option>
+            </select>
+            <textarea id="manualEntryNote" placeholder="Nota (opzionale)"></textarea>
+            <button onclick="manualEntry()" class="manualEntryBtn">Inserisci manualmente</button>
+        </div>
         <br>
         <button id="downloadCSVBtn" onclick="downloadCSV()">Scarica tabella (CSV)</button>
         <button id="deleteAllDataBtn" onclick="deleteAllData()">Elimina tutti i dati</button>
