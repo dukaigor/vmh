@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VMH Tracker">
+    <link rel="apple-touch-icon" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png">
+    <link rel="icon" type="image/png" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png">
+    <title>VMH Tracker</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#2D2D2C">
+    <style>
+        :root {
+            --primary-bg: #2D2D2C;
+            --secondary-bg: #3D3D3C;
+            --text-color: #fff;
+            --button-green: #34C759;
+            --button-red: #FF3B30;
+            --button-blue: #007AFF;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            max-width: 100%;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+        }
+        select, button, input, textarea { 
+            width: 100%;
+            margin: 10px 0; 
+            padding: 15px;
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            appearance: none;
+        }
+        button {
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button:hover {
+            background-color: #4D4D4C;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        #adminPanel { 
+            display: none; 
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        #adminPanel h3, #adminPanel h4 {
+            color: #000;
+        }
+        #adminPanel select, #adminPanel input, #adminPanel textarea {
+            background-color: #f0f0f0;
+            color: #000;
+            border: 1px solid #ccc;
+        }
+        #adminPanel button {
+            color: #fff;
+        }
+        #adminPanel table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background-color: #fff;
+            color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #adminPanel th, #adminPanel td { 
+            border: 1px solid #ccc; 
+            padding: 12px; 
+            text-align: left; 
+        }
+        #adminPanel th { 
+            background-color: #f0f0f0; 
+        }
+        #logo {
+            width: 100%;
+            max-width: 200px;
+            margin: 20px auto;
+            display: block;
+        }
+        .main-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            width: 100%;
+        }
+        #accessAdminBtn, #closeAdminBtn, #deleteAllDataBtn, .deleteRowBtn, #downloadCSVBtn {
+            background-color: var(--button-red);
+        }
+        #entrataBtn {
+            background-color: var(--button-green);
+            font-weight: bold;
+        }
+        #uscitaBtn {
+            background-color: var(--button-red);
+            font-weight: bold;
+        }
+        .editBtn, .manualEntryBtn {
+            background-color: var(--button-blue);
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            select, button, input, textarea {
+                font-size: 14px;
+                padding: 12px;
+            }
+            #adminPanel table {
+                font-size: 12px;
+            }
+            #adminPanel th, #adminPanel td {
+                padding: 8px;
+            }
+            #logo {
+                max-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-controls">
+        <select id="worker" name="worker"></select>
+        <textarea id="note" placeholder="Aggiungi una nota (opzionale)"></textarea>
+        <div class="action-buttons">
+            <button id="entrataBtn" onclick="recordAttendance('Entrata')">ENTRATA</button>
+            <button id="uscitaBtn" onclick="recordAttendance('Uscita')">USCITA</button>
+        </div>
+    </div>
+    
+    <button id="accessAdminBtn" onclick="accessAdminPanel()">Accesso Admin</button>
+    <button id="installButton" style="display: none;">Installa applicazione</button>
+    
+    <div id="adminPanel">
+        <button id="closeAdminBtn" onclick="closeAdminPanel()">Chiudi Pannello Admin</button>
+        <h3>Pannello di amministrazione</h3>
+        <input type="text" id="newWorker" placeholder="Nome nuovo lavoratore">
+        <button onclick="addWorker()">Aggiungi lavoratore</button>
+        <br>
+        <select id="workerToEdit"></select>
+        <input type="text" id="newWorkerName" placeholder="Nuovo nome del lavoratore">
+        <button onclick="editWorker()">Modifica nome lavoratore</button>
+        <br>
+        <select id="workerToRemove"></select>
+        <button onclick="removeWorker()">Rimuovi lavoratore</button>
+        <br>
+        <h4>Inserimento manuale</h4>
+        <select id="workerForManualEntry"></select>
+        <input type="datetime-local" id="manualEntryDateTime">
+        <select id="manualEntryAction">
+            <option value="Entrata">Entrata</option>
+            <option value="Uscita">Uscita</option>
+        </select>
+        <textarea id="manualEntryNote" placeholder="Nota (opzionale)"></textarea>
+        <button onclick="manualEntry()" class="manualEntryBtn">Inserisci manualmente</button>
+        <br>
+        <button id="downloadCSVBtn" onclick="downloadCSV()">Scarica tabella (CSV)</button>
+        <button id="deleteAllDataBtn" onclick="deleteAllData()">Elimina tutti i dati</button>
+        
+        <table id="attendanceTable">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Azione</th>
+                    <th>Data e Ora</th>
+                    <th>Nota</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <h3>Ore lavorate per mese</h3>
+        <table id="hoursWorkedTable">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Mese</th>
+                    <th>Ore lavorate</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <img id="logo" src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png" alt="Valery Mystic Hair Logo">
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6E5Xn5RvZViYJW-hxh3pn8w1ALDZpOb4",
+            authDomain: "vmh-tracker.firebaseapp.com",
+            databaseURL: "https://vmh-tracker-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "vmh-tracker",
+            storageBucket: "vmh-tracker.appspot.com",
+            messagingSenderId: "1036108389148",
+            appId: "1:1036108389148:web:2add2da83a2759913138d9"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let workers = [];
+        let attendanceData = [];
+
+        function updateWorkerSelects() {
+            const workerSelects = ['worker', 'workerToEdit', 'workerToRemove', 'workerForManualEntry'];
+            workerSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '';
+                workers.forEach(worker => {
+                    select.add(new Option(worker, worker));
+                });
+            });
+        }
+
+        function recordAttendance(action) {
+            const worker = document.getElementById('worker').value;
+            const note = document.getElementById('note').value;
+            const timestamp = new Date().toLocaleString('it-IT', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            const newRecord = { worker, action, timestamp, note };
+            database.ref('attendance').push(newRecord);
+            alert(`Azione registrata: ${worker} - ${action}`);
+            document.getElementById('note').value = '';
+        }
+
+        function updateAttendanceTable() {
+            const tableBody = document.querySelector('#attendanceTable tbody');
+            tableBody.innerHTML = '';
+            attendanceData.forEach((record) => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = record.worker;
+                row.insertCell(1).textContent = record.action;
+                row.insertCell(2).textContent = record.timestamp;
+                row.insertCell(3).textContent = record.note || '';
+                const deleteCell = row.insertCell(4);
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Elimina';
+                deleteButton.className = 'deleteRowBtn';
+                deleteButton.onclick = () => deleteRow(record.id);
+                deleteCell.appendChild(deleteButton);
+            });
+        }
+
+        function deleteRow(id) {
+            if (confirm('Sei sicuro di voler eliminare questa riga?')) {
+                database.ref('attendance').child(id).remove();
+            }
+        }
+
+        function deleteAllData() {
+            if (confirm('Sei sicuro di voler eliminare tutti i dati? Questa azione non può essere annullata.')) {
+                database.ref('attendance').remove();
+                alert('Tutti i dati sono stati eliminati.');
+            }
+        }
+
+        function accessAdminPanel() {
+            const password = prompt("Inserisci la password di admin:");
+            if (password === '1309') {
+                document.getElementById('adminPanel').style.display = 'block';
+                updateAttendanceTable();
+                updateHoursWorkedTable();
+            } else {
+                alert('Password non corretta');
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function addWorker() {
+            const newWorker = document.getElementById('newWorker').value.trim();
+            if (newWorker && !workers.includes(newWorker)) {
+                database.ref('workers').push(newWorker);
+                document.getElementById('newWorker').value = '';
+                alert(`Il lavoratore ${newWorker} è stato aggiunto.`);
+            } else {
+                alert('Il nome del lavoratore non è valido o esiste già.');
+            }
+        }
+
+        function editWorker() {
+            const workerToEdit = document.getElementById('workerToEdit').value;
+            const newName = document.getElementById('newWorkerName').value.trim();
+            if (newName && newName !== workerToEdit) {
+                const workerRef = database.ref('workers');
+                workerRef.once('value', snapshot => {
+                    snapshot.forEach(childSnapshot => {
+                        if (childSnapshot.val() === workerToEdit) {
+                            childSnapshot.ref.set(newName);
+                            // Update attendance records
+                            database.ref('attendance').orderByChild('worker').equalTo(workerToEdit).once('value', attendanceSnapshot => {
+                                attendanceSnapshot.forEach(record => {
+                                    record.ref.update({ worker: newName });
+                                });
+                            });
+                            alert(`Il nome del lavoratore è stato modificato da ${workerToEdit} a ${newName}.`);
+                        }
+                    });
+                });
+                document.getElementById('newWorkerName').value = '';
+            } else {
+                alert('Il nuovo nome non è valido o è uguale al nome attuale.');
+            }
+        }
+
+        function removeWorker() {
+            const workerToRemove = document.getElementById('workerToRemove').value;
+            if (workerToRemove && confirm(`Sei sicuro di voler rimuovere il lavoratore ${workerToRemove}?`)) {
+                const workerRef = database.ref('workers');
+                workerRef.once('value', snapshot => {
+                    snapshot.forEach(childSnapshot => {
+                        if (childSnapshot.val() === workerToRemove) {
+                            childSnapshot.ref.remove();
+                        }
+                    });
+                });
+                alert(`Il lavoratore ${workerToRemove} è stato rimosso.`);
+            }
+        }
+
+        function manualEntry() {
+            const worker = document.getElementById('workerForManualEntry').value;
+            const dateTime = document.getElementById('manualEntryDateTime').value;
+            const action =
+ document.getElementById('manualEntryAction').value;
+            const note = document.getElementById('manualEntryNote').value;
+
+            if (!worker || !dateTime)  {
+                alert('Per favore, compila tutti i campi obbligatori.');
+                return;
+            }
+
+            const timestamp = new Date(dateTime).toLocaleString('it-IT', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            const newRecord = { worker, action, timestamp, note };
+            database.ref('attendance').push(newRecord);
+            alert('Registrazione manuale inserita con successo.');
+
+            // Reset form
+            document.getElementById('manualEntryDateTime').value = '';
+            document.getElementById('manualEntryNote').value = '';
+        }
+
+        function downloadCSV() {
+            let csv = 'Nome,Azione,Data e Ora,Nota\n';
+            attendanceData.forEach(record => {
+                csv += `"${record.worker}","${record.action}","${record.timestamp}","${record.note || ''}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'registro_presenze.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        function updateHoursWorkedTable() {
+            const workerHours = {};
+
+            attendanceData.forEach(record => {
+                const [day, month, year] = record.timestamp.split(', ')[0].split('/');
+                const monthYear = `${month}/${year}`;
+                
+                if (!workerHours[record.worker]) {
+                    workerHours[record.worker] = {};
+                }
+                if (!workerHours[record.worker][monthYear]) {
+                    workerHours[record.worker][monthYear] = { lastEntry: null, totalHours: 0 };
+                }
+
+                if (record.action === 'Entrata') {
+                    workerHours[record.worker][monthYear].lastEntry = new Date(record.timestamp);
+                } else if (record.action === 'Uscita' && workerHours[record.worker][monthYear].lastEntry) {
+                    const exitTime = new Date(record.timestamp);
+                    const hoursWorked = (exitTime - workerHours[record.worker][monthYear].lastEntry) / (1000 * 60 * 60);
+                    workerHours[record.worker][monthYear].totalHours += hoursWorked;
+                    workerHours[record.worker][monthYear].lastEntry = null;
+                }
+            });
+
+            const tableBody = document.querySelector('#hoursWorkedTable tbody');
+            tableBody.innerHTML = '';
+            for (const [worker, months] of Object.entries(workerHours)) {
+                for (const [month, data] of Object.entries(months)) {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = worker;
+                    row.insertCell(1).textContent = month;
+                    row.insertCell(2).textContent = data.totalHours.toFixed(2);
+                }
+            }
+        }
+
+        database.ref('workers').on('value', snapshot => {
+            workers = snapshot.val() ? Object.values(snapshot.val()) : [];
+            updateWorkerSelects();
+        });
+
+        database.ref('attendance').on('value', snapshot => {
+            attendanceData = snapshot.val() ? Object.entries(snapshot.val()).map(([id, data]) => ({id, ...data})) : [];
+            updateAttendanceTable();
+            updateHoursWorkedTable();
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        let deferredPrompt;
+        const installButton = document.getElementById('installButton');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installButton.style.display = 'block';
+        });
+
+        installButton.addEventListener('click', (e) => {
+            installButton.style.display = 'none';
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                } else {
+                    console.log('User dismissed the install prompt');
+                }
+                deferredPrompt = null;
+            });
+        });
+    </script>
+</body>
+</html>
