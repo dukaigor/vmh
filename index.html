@@ -30,6 +30,9 @@
             padding: 20px;
             background-color: var(--primary-bg);
             color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         select, button, input, textarea { 
             width: 100%;
@@ -120,6 +123,23 @@
         .editBtn, .manualEntryBtn {
             background-color: var(--button-blue);
         }
+        #messageBox {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 1000;
+        }
+        .footer {
+            margin-top: auto;
+            text-align: center;
+        }
         @media (max-width: 600px) {
             body {
                 padding: 10px;
@@ -150,7 +170,6 @@
         </div>
     </div>
     
-    <button id="accessAdminBtn" onclick="accessAdminPanel()">Accesso Admin</button>
     <button id="installButton" style="display: none;">Installa applicazione</button>
     
     <div id="adminPanel">
@@ -207,6 +226,12 @@
 
     <img id="logo" src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png" alt="Valery Mystic Hair Logo">
 
+    <div id="messageBox"></div>
+
+    <div class="footer">
+        <button id="accessAdminBtn" onclick="accessAdminPanel()">Accesso Admin</button>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
@@ -240,10 +265,19 @@
         function checkDuplicateAction(worker, action, currentDate) {
             const todayEntries = attendanceData.filter(record => 
                 record.worker === worker && 
-                record.action === action && 
                 new Date(record.timestamp).toDateString() === currentDate.toDateString()
             );
-            return todayEntries.length > 0;
+            const lastEntry = todayEntries[todayEntries.length - 1];
+            return lastEntry && lastEntry.action === action;
+        }
+
+        function showMessage(message) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 4000);
         }
 
         function recordAttendance(action) {
@@ -260,14 +294,19 @@
             });
 
             if (checkDuplicateAction(worker, action, currentDate)) {
-                alert(`Attenzione: ${worker} ha già registrato un'azione di ${action} oggi.`);
+                showMessage(`Attenzione: ${worker} ha già registrato un'azione di ${action} oggi.`);
                 return;
             }
 
             const newRecord = { worker, action, timestamp, note };
             database.ref('attendance').push(newRecord);
-            alert(`Azione registrata: ${worker} - ${action}`);
             document.getElementById('note').value = '';
+
+            if (action === 'Entrata') {
+                showMessage('Benvenuto al lavoro!');
+            } else {
+                showMessage('Ciao, è una bella giornata!');
+            }
         }
 
         function updateAttendanceTable() {
@@ -297,7 +336,7 @@
         function deleteAllData() {
             if (confirm('Sei sicuro di voler eliminare tutti i dati? Questa azione non può essere annullata.')) {
                 database.ref('attendance').remove();
-                alert('Tutti i dati sono stati eliminati.');
+                showMessage('Tutti i dati sono stati eliminati.');
             }
         }
 
@@ -308,7 +347,7 @@
                 updateAttendanceTable();
                 updateHoursWorkedTable();
             } else {
-                alert('Password non corretta');
+                showMessage('Password non corretta');
             }
         }
 
@@ -321,9 +360,9 @@
             if (newWorker && !workers.includes(newWorker)) {
                 database.ref('workers').push(newWorker);
                 document.getElementById('newWorker').value = '';
-                alert(`Il lavoratore ${newWorker} è stato aggiunto.`);
+                showMessage(`Il lavoratore ${newWorker} è stato aggiunto.`);
             } else {
-                alert('Il nome del lavoratore non è valido o esiste già.');
+                showMessage('Il nome del lavoratore non è valido o esiste già.');
             }
         }
 
@@ -342,13 +381,13 @@
                                     record.ref.update({ worker: newName });
                                 });
                             });
-                            alert(`Il nome del lavoratore è stato modificato da ${workerToEdit} a ${newName}.`);
+                            showMessage(`Il nome del lavoratore è stato modificato da ${workerToEdit} a ${newName}.`);
                         }
                     });
                 });
                 document.getElementById('newWorkerName').value = '';
             } else {
-                alert('Il nuovo nome non è valido o è uguale al nome attuale.');
+                showMessage('Il nuovo nome non è valido o è uguale al nome attuale.');
             }
         }
 
@@ -363,7 +402,7 @@
                         }
                     });
                 });
-                alert(`Il lavoratore ${workerToRemove} è stato rimosso.`);
+                showMessage(`Il lavoratore ${workerToRemove} è stato rimosso.`);
             }
         }
 
@@ -374,13 +413,13 @@
             const note = document.getElementById('manualEntryNote').value;
 
             if (!worker || !dateTime)  {
-                alert('Per favore, compila tutti i campi obbligatori.');
+                showMessage('Per favore, compila tutti i campi obbligatori.');
                 return;
             }
 
             const entryDate = new Date(dateTime);
             if (checkDuplicateAction(worker, action, entryDate)) {
-                alert(`Attenzione: ${worker} ha già registrato un'azione di ${action} in questa data.`);
+                showMessage(`Attenzione: ${worker} ha già registrato un'azione di ${action} in questa data.`);
                 return;
             }
 
@@ -395,7 +434,7 @@
 
             const newRecord = { worker, action, timestamp, note };
             database.ref('attendance').push(newRecord);
-            alert('Registrazione manuale inserita con successo.');
+            showMessage('Registrazione manuale inserita con successo.');
 
             // Reset form
             document.getElementById('manualEntryDateTime').value = '';
