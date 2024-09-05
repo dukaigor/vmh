@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="VMH Tracker">
-<link rel="apple-touch-icon" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png">
-<link rel="icon" type="image/png" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png">
-<link rel="manifest" href="manifest.json">
-<title>VMH Tracker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="VMH Tracker for workers">
+    <meta name="theme-color" content="#2D2D2C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VMH Tracker">
+    <link rel="apple-touch-icon" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png">
+    <link rel="icon" type="image/png" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png">
+    <link rel="manifest" href="/manifest.json">
+    <title>VMH Tracker</title>
 <style>
     :root {
         --primary-bg: #2D2D2C;
@@ -485,11 +487,11 @@
 
     // Check if the browser supports service workers
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
-                console.log('ServiceWorker registration successful with scope: ', registration.scope);
-            }, function(err) {
-                console.log('ServiceWorker registration failed: ', err);
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
             });
         });
     }
