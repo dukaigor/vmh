@@ -12,489 +12,489 @@
     <link rel="icon" type="image/png" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png">
     <link rel="manifest" href="/manifest.json">
     <title>VMH Tracker</title>
-<style>
-    :root {
-        --primary-bg: #2D2D2C;
-        --secondary-bg: #3D3D3C;
-        --text-color: #fff;
-        --button-green: #34C759;
-        --button-red: #FF3B30;
-        --button-blue: #007AFF;
-    }
-    * { box-sizing: border-box; }
-    body { 
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-        max-width: 100%;
-        margin: 0;
-        padding: 20px;
-        background-color: var(--primary-bg);
-        color: var(--text-color);
-    }
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 15px;
-    }
-    select, button, input, textarea { 
-        width: 100%;
-        margin: 10px 0; 
-        padding: 15px;
-        background-color: var(--secondary-bg);
-        color: var(--text-color);
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-    }
-    button {
-        cursor: pointer;
-        transition: background-color 0.3s, transform 0.1s;
-    }
-    button:hover { background-color: #4D4D4C; }
-    button:active { transform: scale(0.98); }
-    #adminPanel { 
-        display: none; 
-        background-color: #fff;
-        color: #000;
-        padding: 20px;
-        border-radius: 8px;
-        margin-top: 20px;
-    }
-    #workersGrid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 20px;
-        margin-bottom: 20px;
-        justify-content: center;
-    }
-    .workerCircle {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        cursor: pointer;
-    }
-    .workerCircle img {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid transparent;
-        transition: border-color 0.3s;
-    }
-    .workerCircle.selected img {
-        border-color: var(--button-green);
-    }
-    .workerCircle span {
-        margin-top: 10px;
-        text-align: center;
-        font-weight: bold;
-        text-transform: uppercase;
-    }
-    #messageBox {
-        display: none;
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: var(--secondary-bg);
-        color: var(--text-color);
-        padding: 15px;
-        border-radius: 8px;
-        text-align: center;
-        z-index: 1000;
-    }
-    #entrataBtn {
-        background-color: var(--button-green);
-    }
-    #uscitaBtn {
-        background-color: var(--button-red);
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
-    th {
-        background-color: #f2f2f2;
-    }
-    .deleteRowBtn {
-        background-color: var(--button-red);
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        cursor: pointer;
-    }
-    @media (min-width: 768px) {
-        .action-buttons {
-            display: flex;
-            gap: 10px;
+    <style>
+        :root {
+            --primary-bg: #2D2D2C;
+            --secondary-bg: #3D3D3C;
+            --text-color: #fff;
+            --button-green: #34C759;
+            --button-red: #FF3B30;
+            --button-blue: #007AFF;
         }
-        .action-buttons button {
-            flex: 1;
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            max-width: 100%;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
         }
-    }
-    @media (min-width: 1024px) {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        select, button, input, textarea { 
+            width: 100%;
+            margin: 10px 0; 
+            padding: 15px;
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button:hover { background-color: #4D4D4C; }
+        button:active { transform: scale(0.98); }
+        #adminPanel { 
+            display: none; 
+            background-color: #fff;
+            color: #000;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
         #workersGrid {
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .workerCircle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
         }
         .workerCircle img {
-            width: 150px;
-            height: 150px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
         }
-    }
-</style>
+        .workerCircle.selected img {
+            border-color: var(--button-green);
+        }
+        .workerCircle span {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        #messageBox {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--secondary-bg);
+            color: var(--text-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 1000;
+        }
+        #entrataBtn {
+            background-color: var(--button-green);
+        }
+        #uscitaBtn {
+            background-color: var(--button-red);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .deleteRowBtn {
+            background-color: var(--button-red);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        @media (min-width: 768px) {
+            .action-buttons {
+                display: flex;
+                gap: 10px;
+            }
+            .action-buttons button {
+                flex: 1;
+            }
+        }
+        @media (min-width: 1024px) {
+            #workersGrid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            .workerCircle img {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <div id="workersGrid"></div>
+    <div class="container">
+        <div id="workersGrid"></div>
 
-    <div class="main-controls">
-        <select id="worker" name="worker"></select>
-        <textarea id="note" placeholder="Aggiungi una nota (opzionale)"></textarea>
-        <div class="action-buttons">
-            <button id="entrataBtn" onclick="recordAttendance('Entrata')">ENTRATA</button>
-            <button id="uscitaBtn" onclick="recordAttendance('Uscita')">USCITA</button>
+        <div class="main-controls">
+            <select id="worker" name="worker"></select>
+            <textarea id="note" placeholder="Aggiungi una nota (opzionale)"></textarea>
+            <div class="action-buttons">
+                <button id="entrataBtn" onclick="recordAttendance('Entrata')">ENTRATA</button>
+                <button id="uscitaBtn" onclick="recordAttendance('Uscita')">USCITA</button>
+            </div>
         </div>
-    </div>
 
-    <button id="accessAdminBtn" onclick="accessAdminPanel()">Accesso Admin</button>
+        <button id="accessAdminBtn" onclick="accessAdminPanel()">Accesso Admin</button>
 
-    <div id="adminPanel">
-        <button id="closeAdminBtn" onclick="closeAdminPanel()">Chiudi Pannello Admin</button>
-        <h3>Pannello di amministrazione</h3>
-        <input type="text" id="newWorker" placeholder="Nome nuovo lavoratore">
-        <button onclick="addWorker()">Aggiungi lavoratore</button>
-        <br>
-        <select id="workerToEdit"></select>
-        <input type="text" id="newWorkerName" placeholder="Nuovo nome del lavoratore">
-        <button onclick="editWorker()">Modifica nome del lavoratore</button>
-        <br>
-        <select id="workerToRemove"></select>
-        <button onclick="removeWorker()">Elimina lavoratore</button>
-        <br>
-        <h4>Caricamento foto lavoratori</h4>
-        <select id="workerForImage"></select>
-        <input type="file" id="workerImage" accept="image/*">
-        <button onclick="uploadWorkerImage()">Carica foto</button>
-        
-        <h4>Inserimento manuale</h4>
-        <select id="manualWorker"></select>
-        <input type="datetime-local" id="manualDateTime">
-        <select id="manualAction">
-            <option value="Entrata">Entrata</option>
-            <option value="Uscita">Uscita</option>
-        </select>
-        <textarea id="manualNote" placeholder="Nota (opzionale)"></textarea>
-        <button onclick="manualEntry()">Inserisci</button>
-        
-        <h4>Entrate e Uscite Personale</h4>
-        <button onclick="downloadCSV()">Scarica CSV</button>
-        <button onclick="deleteAllData()">Elimina tutti i dati</button>
-        <table id="attendanceTable">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Azione</th>
-                    <th>Data e Ora</th>
-                    <th>Nota</th>
-                    <th>Azioni</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-
-        <h4>Ore Lavorate per Mese</h4>
-        <table id="hoursWorkedTable">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Mese</th>
-                    <th>Ore Lavorate</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <div id="messageBox"></div>
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyA6E5Xn5RvZViYJW-hxh3pn8w1ALDZpOb4",
-        authDomain: "vmh-tracker.firebaseapp.com",
-        databaseURL: "https://vmh-tracker-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "vmh-tracker",
-        storageBucket: "vmh-tracker.appspot.com",
-        messagingSenderId: "1036108389148",
-        appId: "1:1036108389148:web:2add2da83a2759913138d9"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const storage = firebase.storage();
-
-    let workers = [];
-    let selectedWorker = null;
-    let attendanceData = [];
-
-    function updateWorkerSelects() {
-        const workerSelects = ['worker', 'workerToEdit', 'workerToRemove', 'workerForImage', 'manualWorker'];
-        workerSelects.forEach(selectId => {
-            const select = document.getElementById(selectId);
-            select.innerHTML = '';
-            workers.forEach(worker => {
-                select.add(new Option(worker.name, worker.id));
-            });
-        });
-    }
-
-    function updateWorkersGrid() {
-        const grid = document.getElementById('workersGrid');
-        grid.innerHTML = '';
-        workers.forEach(worker => {
-            const div = document.createElement('div');
-            div.className = `workerCircle ${worker.id === selectedWorker?.id ? 'selected' : ''}`;
-            div.onclick = () => selectWorker(worker);
-            div.innerHTML = `
-                <img src="${worker.imageUrl || '/placeholder.svg?height=150&width=150'}" alt="${worker.name}">
-                <span>${worker.name}</span>
-            `;
-            grid.appendChild(div);
-        });
-    }
-
-    function selectWorker(worker) {
-        selectedWorker = worker.id === selectedWorker?.id ? null : worker;
-        updateWorkersGrid();
-        document.getElementById('worker').value = selectedWorker ? selectedWorker.id : '';
-    }
-
-    function showMessage(message) {
-        const messageBox = document.getElementById('messageBox');
-        messageBox.textContent = message;
-        messageBox.style.display = 'block';
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-        }, 4000);
-    }
-
-    function recordAttendance(action) {
-        const worker = document.getElementById('worker').value;
-        const note = document.getElementById('note').value;
-        const timestamp = new Date().toLocaleString('it-IT');
-        const newRecord = { worker, action, timestamp, note };
-        database.ref('attendance').push(newRecord);
-        document.getElementById('note').value = '';
-        showMessage(`${action} registrata per ${workers.find(w => w.id === worker).name}`);
-    }
-
-    function accessAdminPanel() {
-        const password = prompt("Inserisci la password di admin:");
-        if (password === '1309') {
-            document.getElementById('adminPanel').style.display = 'block';
-            updateAttendanceTable();
-            updateHoursWorkedTable();
-        } else {
-            showMessage('Password errata');
-        }
-    }
-
-    function closeAdminPanel() {
-        document.getElementById('adminPanel').style.display = 'none';
-    }
-
-    function addWorker() {
-        const newWorker = document.getElementById('newWorker').value.trim();
-        if (newWorker && !workers.some(w => w.name === newWorker)) {
-            database.ref('workers').push({name: newWorker});
-            document.getElementById('newWorker').value = '';
-            showMessage(`Il lavoratore ${newWorker} è stato aggiunto.`);
-        } else {
-            showMessage('Il nome del lavoratore non è valido o esiste già.');
-        }
-    }
-
-    function editWorker() {
-        const workerToEdit = document.getElementById('workerToEdit').value;
-        const newName = document.getElementById('newWorkerName').value.trim();
-        if (newName && newName !== workers.find(w => w.id === workerToEdit).name) {
-            database.ref(`workers/${workerToEdit}`).update({name: newName});
-            document.getElementById('newWorkerName').value = '';
-            showMessage(`Il nome del lavoratore è stato modificato in ${newName}.`);
-        } else {
-            showMessage('Il nuovo nome non è valido o è identico a quello esistente.');
-        }
-    }
-
-    function removeWorker() {
-        const workerToRemove = document.getElementById('workerToRemove').value;
-        if (workerToRemove && confirm(`Sei sicuro di voler eliminare questo lavoratore?`)) {
-            database.ref(`workers/${workerToRemove}`).remove();
-            showMessage(`Il lavoratore è stato eliminato.`);
-        }
-    }
-
-    async function uploadWorkerImage() {
-        const workerId = document.getElementById('workerForImage').value;
-        const imageFile = document.getElementById('workerImage').files[0];
-        if (workerId && imageFile) {
-            try {
-                console.log('Inizio caricamento immagine...');
-                const imageRef = storage.ref(`worker-images/${workerId}`);
-                await imageRef.put(imageFile);
-                console.log('Immagine caricata con successo');
-                const imageUrl = await imageRef.getDownloadURL();
-                console.log('URL immagine ottenuto:', imageUrl);
-                await database.ref(`workers/${workerId}`).update({imageUrl});
-                console.log('Dati del lavoratore aggiornati nel database');
-                showMessage('La foto del lavoratore è stata caricata con successo.');
-                document.getElementById('workerImage').value = '';
-            } catch (error) {
-                console.error('Errore durante il caricamento dell\'immagine:', error);
-                showMessage('Si è verificato un errore durante il caricamento della foto. Per favore riprova.');
-            }
-        } else {
-            showMessage('Per favore seleziona un lavoratore e un\'immagine.');
-        }
-    }
-
-    function updateAttendanceTable() {
-        const tableBody = document.querySelector('#attendanceTable tbody');
-        tableBody.innerHTML = '';
-        attendanceData.forEach((record) => {
-            const row = tableBody.insertRow();
-            row.insertCell(0).textContent = workers.find(w => w.id === record.worker)?.name || record.worker;
-            row.insertCell(1).textContent = record.action;
-            row.insertCell(2).textContent = record.timestamp;
-            row.insertCell(3).textContent = record.note || '';
-            const deleteCell = row.insertCell(4);
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Elimina';
-            deleteButton.className = 'deleteRowBtn';
-            deleteButton.onclick = () => deleteAttendanceRecord(record.id);
-            deleteCell.appendChild(deleteButton);
-        });
-    }
-
-    function deleteAttendanceRecord(recordId) {
-        if (confirm('Sei sicuro di voler eliminare questa registrazione?')) {
-            database.ref(`attendance/${recordId}`).remove();
-            showMessage('La registrazione è stata eliminata.');
-        }
-    }
-
-    function updateHoursWorkedTable() {
-        const workerHours = {};
-
-        attendanceData.forEach(record => {
-            const [day, month, year] = record.timestamp.split(', ')[0].split('/');
-            const monthYear = `${month.padStart(2, '0')}.${year}`;
-            const workerName = workers.find(w => w.id === record.worker)?.name || record.worker;
+        <div id="adminPanel">
+            <button id="closeAdminBtn" onclick="closeAdminPanel()">Chiudi Pannello Admin</button>
+            <h3>Pannello di amministrazione</h3>
+            <input type="text" id="newWorker" placeholder="Nome nuovo lavoratore">
+            <button onclick="addWorker()">Aggiungi lavoratore</button>
+            <br>
+            <select id="workerToEdit"></select>
+            <input type="text" id="newWorkerName" placeholder="Nuovo nome del lavoratore">
+            <button onclick="editWorker()">Modifica nome del lavoratore</button>
+            <br>
+            <select id="workerToRemove"></select>
+            <button onclick="removeWorker()">Elimina lavoratore</button>
+            <br>
+            <h4>Caricamento foto lavoratori</h4>
+            <select id="workerForImage"></select>
+            <input type="file" id="workerImage" accept="image/*">
+            <button onclick="uploadWorkerImage()">Carica foto</button>
             
-            if (!workerHours[workerName]) {
-                workerHours[workerName] = {};
-            }
-            if (!workerHours[workerName][monthYear]) {
-                workerHours[workerName][monthYear] = { lastEntry: null, totalHours: 0 };
-            }
+            <h4>Inserimento manuale</h4>
+            <select id="manualWorker"></select>
+            <input type="datetime-local" id="manualDateTime">
+            <select id="manualAction">
+                <option value="Entrata">Entrata</option>
+                <option value="Uscita">Uscita</option>
+            </select>
+            <textarea id="manualNote" placeholder="Nota (opzionale)"></textarea>
+            <button onclick="manualEntry()">Inserisci</button>
+            
+            <h4>Entrate e Uscite Personale</h4>
+            <button onclick="downloadCSV()">Scarica CSV</button>
+            <button onclick="deleteAllData()">Elimina tutti i dati</button>
+            <table id="attendanceTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Azione</th>
+                        <th>Data e Ora</th>
+                        <th>Nota</th>
+                        <th>Azioni</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
 
-            const recordDate = new Date(record.timestamp);
-            if (record.action === 'Entrata') {
-                workerHours[workerName][monthYear].lastEntry = recordDate;
-            } else if (record.action === 'Uscita' && workerHours[workerName][monthYear].lastEntry) {
-                const hoursWorked = (recordDate - workerHours[workerName][monthYear].lastEntry) / (1000 * 60 * 60);
-                workerHours[workerName][monthYear].totalHours += hoursWorked;
-                workerHours[workerName][monthYear].lastEntry = null;
-            }
-        });
+            <h4>Ore Lavorate per Mese</h4>
+            <table id="hoursWorkedTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Mese</th>
+                        <th>Ore Lavorate</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
 
-        const tableBody = document.querySelector('#hoursWorkedTable tbody');
-        tableBody.innerHTML = '';
-        for (const [worker, months] of Object.entries(workerHours)) {
-            for (const [month, data] of Object.entries(months)) {
-                const row = tableBody.insertRow();
-                row.insertCell(0).textContent = worker;
-                row.insertCell(1).textContent = month;
-                row.insertCell(2).textContent = data.totalHours.toFixed(2);
-            }
+        <div id="messageBox"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6E5Xn5RvZViYJW-hxh3pn8w1ALDZpOb4",
+            authDomain: "vmh-tracker.firebaseapp.com",
+            databaseURL: "https://vmh-tracker-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "vmh-tracker",
+            storageBucket: "vmh-tracker.appspot.com",
+            messagingSenderId: "1036108389148",
+            appId: "1:1036108389148:web:2add2da83a2759913138d9"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const storage = firebase.storage();
+
+        let workers = [];
+        let selectedWorker = null;
+        let attendanceData = [];
+
+        function updateWorkerSelects() {
+            const workerSelects = ['worker', 'workerToEdit', 'workerToRemove', 'workerForImage', 'manualWorker'];
+            workerSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                select.innerHTML = '';
+                workers.forEach(worker => {
+                    select.add(new Option(worker.name, worker.id));
+                });
+            });
         }
-    }
 
-    function manualEntry() {
-        const worker = document.getElementById('manualWorker').value;
-        const dateTime = document.getElementById('manualDateTime').value;
-        const action = document.getElementById('manualAction').value;
-        const note = document.getElementById('manualNote').value;
-        
-        if (worker && dateTime && action) {
-            const timestamp = new Date(dateTime).toLocaleString('it-IT');
+        function updateWorkersGrid() {
+            const grid = document.getElementById('workersGrid');
+            grid.innerHTML = '';
+            workers.forEach(worker => {
+                const div = document.createElement('div');
+                div.className = `workerCircle ${worker.id === selectedWorker?.id ? 'selected' : ''}`;
+                div.onclick = () => selectWorker(worker);
+                div.innerHTML = `
+                    <img src="${worker.imageUrl || '/placeholder.svg?height=150&width=150'}" alt="${worker.name}">
+                    <span>${worker.name}</span>
+                `;
+                grid.appendChild(div);
+            });
+        }
+
+        function selectWorker(worker) {
+            selectedWorker = worker.id === selectedWorker?.id ? null : worker;
+            updateWorkersGrid();
+            document.getElementById('worker').value = selectedWorker ? selectedWorker.id : '';
+        }
+
+        function showMessage(message) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, 4000);
+        }
+
+        function recordAttendance(action) {
+            const worker = document.getElementById('worker').value;
+            const note = document.getElementById('note').value;
+            const timestamp = new Date().toLocaleString('it-IT');
             const newRecord = { worker, action, timestamp, note };
             database.ref('attendance').push(newRecord);
-            showMessage('Registrazione manuale inserita con successo.');
-            document.getElementById('manualNote').value = '';
-        } else {
-            showMessage('Per favore compila tutti i campi obbligatori.');
+            document.getElementById('note').value = '';
+            showMessage(`${action} registrata per ${workers.find(w => w.id === worker).name}`);
         }
-    }
 
-    function downloadCSV() {
-        let csvContent = "Nome,Azione,Data e Ora,Nota\n";
-        attendanceData.forEach((record) => {
-            const workerName = workers.find(w => w.id === record.worker)?.name || record.worker;
-            csvContent += `${workerName},${record.action},${record.timestamp},"${record.note || ''}"\n`;
+        function accessAdminPanel() {
+            const password = prompt("Inserisci la password di admin:");
+            if (password === '1309') {
+                document.getElementById('adminPanel').style.display = 'block';
+                updateAttendanceTable();
+                updateHoursWorkedTable();
+            } else {
+                showMessage('Password errata');
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function addWorker() {
+            const newWorker = document.getElementById('newWorker').value.trim();
+            if (newWorker && !workers.some(w => w.name === newWorker)) {
+                database.ref('workers').push({name: newWorker});
+                document.getElementById('newWorker').value = '';
+                showMessage(`Il lavoratore ${newWorker} è stato aggiunto.`);
+            } else {
+                showMessage('Il nome del lavoratore non è valido o esiste già.');
+            }
+        }
+
+        function editWorker() {
+            const workerToEdit = document.getElementById('workerToEdit').value;
+            const newName = document.getElementById('newWorkerName').value.trim();
+            if (newName && newName !== workers.find(w => w.id === workerToEdit).name) {
+                database.ref(`workers/${workerToEdit}`).update({name: newName});
+                document.getElementById('newWorkerName').value = '';
+                showMessage(`Il nome del lavoratore è stato modificato in ${newName}.`);
+            } else {
+                showMessage('Il nuovo nome non è valido o è identico a quello esistente.');
+            }
+        }
+
+        function removeWorker() {
+            const workerToRemove = document.getElementById('workerToRemove').value;
+            if (workerToRemove && confirm(`Sei sicuro di voler eliminare questo lavoratore?`)) {
+                database.ref(`workers/${workerToRemove}`).remove();
+                showMessage(`Il lavoratore è stato eliminato.`);
+            }
+        }
+
+        async function uploadWorkerImage() {
+            const workerId = document.getElementById('workerForImage').value;
+            const imageFile = document.getElementById('workerImage').files[0];
+            if (workerId && imageFile) {
+                try {
+                    console.log('Inizio caricamento immagine...');
+                    const imageRef = storage.ref(`worker-images/${workerId}`);
+                    await imageRef.put(imageFile);
+                    console.log('Immagine caricata con successo');
+                    const imageUrl = await imageRef.getDownloadURL();
+                    console.log('URL immagine ottenuto:', imageUrl);
+                    await database.ref(`workers/${workerId}`).update({imageUrl});
+                    console.log('Dati del lavoratore aggiornati nel database');
+                    showMessage('La foto del lavoratore è stata caricata con successo.');
+                    document.getElementById('workerImage').value = '';
+                } catch (error) {
+                    console.error('Errore durante il caricamento dell\'immagine:', error);
+                    showMessage('Si è verificato un errore durante il caricamento della foto. Per favore riprova.');
+                }
+            } else {
+                showMessage('Per favore seleziona un lavoratore e un\'immagine.');
+            }
+        }
+
+        function updateAttendanceTable() {
+            const tableBody = document.querySelector('#attendanceTable tbody');
+            tableBody.innerHTML = '';
+            attendanceData.forEach((record) => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = workers.find(w => w.id === record.worker)?.name || record.worker;
+                row.insertCell(1).textContent = record.action;
+                row.insertCell(2).textContent = record.timestamp;
+                row.insertCell(3).textContent = record.note || '';
+                const deleteCell = row.insertCell(4);
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Elimina';
+                deleteButton.className = 'deleteRowBtn';
+                deleteButton.onclick = () => deleteAttendanceRecord(record.id);
+                deleteCell.appendChild(deleteButton);
+            });
+        }
+
+        function deleteAttendanceRecord(recordId) {
+            if (confirm('Sei sicuro di voler eliminare questa registrazione?')) {
+                database.ref(`attendance/${recordId}`).remove();
+                showMessage('La registrazione è stata eliminata.');
+            }
+        }
+
+        function updateHoursWorkedTable() {
+            const workerHours = {};
+
+            attendanceData.forEach(record => {
+                const [day, month, year] = record.timestamp.split(', ')[0].split('/');
+                const monthYear = `${month.padStart(2, '0')}.${year}`;
+                const workerName = workers.find(w => w.id === record.worker)?.name || record.worker;
+                
+                if (!workerHours[workerName]) {
+                    workerHours[workerName] = {};
+                }
+                if (!workerHours[workerName][monthYear]) {
+                    workerHours[workerName][monthYear] = { lastEntry: null, totalHours: 0 };
+                }
+
+                const recordDate = new Date(record.timestamp);
+                if (record.action === 'Entrata') {
+                    workerHours[workerName][monthYear].lastEntry = recordDate;
+                } else if (record.action === 'Uscita' && workerHours[workerName][monthYear].lastEntry) {
+                    const hoursWorked = (recordDate - workerHours[workerName][monthYear].lastEntry) / (1000 * 60 * 60);
+                    workerHours[workerName][monthYear].totalHours += hoursWorked;
+                    workerHours[workerName][monthYear].lastEntry = null;
+                }
+            });
+
+            const tableBody = document.querySelector('#hoursWorkedTable tbody');
+            tableBody.innerHTML = '';
+            for (const [worker, months] of Object.entries(workerHours)) {
+                for (const [month, data] of Object.entries(months)) {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = worker;
+                    row.insertCell(1).textContent = month;
+                    row.insertCell(2).textContent = data.totalHours.toFixed(2);
+                }
+            }
+        }
+
+        function manualEntry() {
+            const worker = document.getElementById('manualWorker').value;
+            const dateTime = document.getElementById('manualDateTime').value;
+            const action = document.getElementById('manualAction').value;
+            const note = document.getElementById('manualNote').value;
+            
+            if (worker && dateTime && action) {
+                const timestamp = new Date(dateTime).toLocaleString('it-IT');
+                const newRecord = { worker, action, timestamp, note };
+                database.ref('attendance').push(newRecord);
+                showMessage('Registrazione manuale inserita con successo.');
+                document.getElementById('manualNote').value = '';
+            } else {
+                showMessage('Per favore compila tutti i campi obbligatori.');
+            }
+        }
+
+        function downloadCSV() {
+            let csvContent = "Nome,Azione,Data e Ora,Nota\n";
+            attendanceData.forEach((record) => {
+                const workerName = workers.find(w => w.id === record.worker)?.name || record.worker;
+                csvContent += `${workerName},${record.action},${record.timestamp},"${record.note || ''}"\n`;
+            });
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "attendance_data.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        function deleteAllData() {
+            if (confirm('Sei sicuro di voler eliminare tutti i dati? Questa azione non può essere annullata.')) {
+                database.ref('attendance').remove();
+                showMessage('Tutti i dati sono stati eliminati.');
+            }
+        }
+
+        database.ref('workers').on('value', snapshot => {
+            workers = snapshot.val() ? Object.entries(snapshot.val()).map(([id, data]) => ({id, ...data})) : [];
+            updateWorkerSelects();
+            updateWorkersGrid();
         });
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        if (link.download !== undefined) {
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "attendance_data.csv");
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    }
 
-    function deleteAllData() {
-        if (confirm('Sei sicuro di voler eliminare tutti i dati? Questa azione non può essere annullata.')) {
-            database.ref('attendance').remove();
-            showMessage('Tutti i dati sono stati eliminati.');
-        }
-    }
+        database.ref('attendance').on('value', snapshot => {
+            attendanceData = snapshot.val() ? Object.entries(snapshot.val()).map(([id, data]) => ({id, ...data})) : [];
+            if (document.getElementById('adminPanel').style.display === 'block') {
+                updateAttendanceTable();
+                updateHoursWorkedTable();
+            }
+        });
 
-    database.ref('workers').on('value', snapshot => {
-        workers = snapshot.val() ? Object.entries(snapshot.val()).map(([id, data]) => ({id, ...data})) : [];
-        updateWorkerSelects();
-        updateWorkersGrid();
-    });
-
-    database.ref('attendance').on('value', snapshot => {
-        attendanceData = snapshot.val() ? Object.entries(snapshot.val()).map(([id, data]) => ({id, ...data})) : [];
-        if (document.getElementById('adminPanel').style.display === 'block') {
-            updateAttendanceTable();
-            updateHoursWorkedTable();
-        }
-    });
-
-    // Check if the browser supports service workers
-    if ('serviceWorker' in navigator) {
+        // Check if the browser supports service workers
+        if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);
                 }, function(err) {
                     console.log('ServiceWorker registration failed: ', err);
+                });
             });
-        });
-    }
-</script>
+        }
+    </script>
 </body>
 </html>
