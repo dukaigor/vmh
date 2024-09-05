@@ -162,11 +162,11 @@
 </head>
 <body>
     <div class="main-controls">
-        <select id="worker" name="worker" onchange="updateButtonVisibility()"></select>
+        <select id="worker" name="worker"></select>
         <textarea id="note" placeholder="Aggiungi una nota (opzionale)"></textarea>
         <div class="action-buttons">
             <button id="entrataBtn" onclick="recordAttendance('Entrata')">ENTRATA</button>
-            <button id="uscitaBtn" onclick="recordAttendance('Uscita')" style="display: none;">USCITA</button>
+            <button id="uscitaBtn" onclick="recordAttendance('Uscita')">USCITA</button>
         </div>
     </div>
     
@@ -260,33 +260,15 @@
                     select.add(new Option(worker, worker));
                 });
             });
-            updateButtonVisibility();
         }
 
-        function updateButtonVisibility() {
-            const worker = document.getElementById('worker').value;
-            const currentDate = new Date().toDateString();
+        function checkDuplicateAction(worker, action, currentDate) {
             const todayEntries = attendanceData.filter(record => 
                 record.worker === worker && 
-                new Date(record.timestamp).toDateString() === currentDate
+                new Date(record.timestamp).toDateString() === currentDate.toDateString()
             );
-            
-            const entrataBtn = document.getElementById('entrataBtn');
-            const uscitaBtn = document.getElementById('uscitaBtn');
-
-            if (todayEntries.length === 0) {
-                entrataBtn.style.display = 'block';
-                uscitaBtn.style.display = 'none';
-            } else {
-                const lastEntry = todayEntries[todayEntries.length - 1];
-                if (lastEntry.action === 'Entrata') {
-                    entrataBtn.style.display = 'none';
-                    uscitaBtn.style.display = 'block';
-                } else {
-                    entrataBtn.style.display = 'block';
-                    uscitaBtn.style.display = 'none';
-                }
-            }
+            const lastEntry = todayEntries[todayEntries.length - 1];
+            return lastEntry && lastEntry.action === action;
         }
 
         function showMessage(message) {
@@ -311,21 +293,20 @@
                 second: '2-digit'
             });
 
+            if (checkDuplicateAction(worker, action, currentDate)) {
+                showMessage(`Attenzione: ${worker} ha già registrato un'azione di ${action} oggi.`);
+                return;
+            }
+
             const newRecord = { worker, action, timestamp, note };
-            database.ref('attendance').push(newRecord)
-                .then(() => {
-                    document.getElementById('note').value = '';
-                    if (action === 'Entrata') {
-                        showMessage('Benvenuto al lavoro!');
-                    } else {
-                        showMessage('Ciao, è una bella giornata!');
-                    }
-                    updateButtonVisibility();
-                })
-                .catch((error) => {
-                    console.error("Error adding document: ", error);
-                    showMessage('Si è verificato un errore. Riprova.');
-                });
+            database.ref('attendance').push(newRecord);
+            document.getElementById('note').value = '';
+
+            if (action === 'Entrata') {
+                showMessage('Benvenuto al lavoro!');
+            } else {
+                showMessage('Ciao, è una bella giornata!');
+            }
         }
 
         function updateAttendanceTable() {
@@ -348,29 +329,14 @@
 
         function deleteRow(id) {
             if (confirm('Sei sicuro di voler eliminare questa riga?')) {
-                database.ref('attendance').child(id).remove()
-                    .then(() => {
-                        showMessage('Riga eliminata con successo.');
-                        updateButtonVisibility();
-                    })
-                    .catch((error) => {
-                        console.error("Error removing document: ", error);
-                        showMessage('Si è verificato un errore durante l\'eliminazione.');
-                    });
+                database.ref('attendance').child(id).remove();
             }
         }
 
         function deleteAllData() {
             if (confirm('Sei sicuro di voler eliminare tutti i dati? Questa azione non può essere annullata.')) {
-                database.ref('attendance').remove()
-                    .then(() => {
-                        showMessage('Tutti i dati sono stati eliminati.');
-                        updateButtonVisibility();
-                    })
-                    .catch((error) => {
-                        console.error("Error removing all data: ", error);
-                        showMessage('Si è verificato un errore durante l\'eliminazione dei dati.');
-                    });
+                database.ref('attendance').remove();
+                showMessage('Tutti i dati sono stati eliminati.');
             }
         }
 
@@ -392,15 +358,9 @@
         function addWorker() {
             const newWorker = document.getElementById('newWorker').value.trim();
             if (newWorker && !workers.includes(newWorker)) {
-                database.ref('workers').push(newWorker)
-                    .then(() => {
-                        document.getElementById('newWorker').value = '';
-                        showMessage(`Il lavoratore ${newWorker} è stato aggiunto.`);
-                    })
-                    .catch((error) => {
-                        console.error("Error adding worker: ", error);
-                        showMessage('Si è verificato un errore durante l\'aggiunta del lavoratore.');
-                    });
+                database.ref('workers').push(newWorker);
+                document.getElementById('newWorker').value = '';
+                showMessage(`Il lavoratore ${newWorker} è stato aggiunto.`);
             } else {
                 showMessage('Il nome del lavoratore non è valido o esiste già.');
             }
@@ -414,24 +374,18 @@
                 workerRef.once('value', snapshot => {
                     snapshot.forEach(childSnapshot => {
                         if (childSnapshot.val() === workerToEdit) {
-                            childSnapshot.ref.set(newName)
-                                .then(() => {
-                                    // Update attendance records
-                                    database.ref('attendance').orderByChild('worker').equalTo(workerToEdit).once('value', attendanceSnapshot => {
-                                        attendanceSnapshot.forEach(record => {
-                                            record.ref.update({ worker: newName });
-                                        });
-                                    });
-                                    showMessage(`Il nome del lavoratore è stato modificato da ${workerToEdit} a ${newName}.`);
-                                    document.getElementById('newWorkerName').value = '';
-                                })
-                                .catch((error) => {
-                                    console.error("Error updating worker: ", error);
-                                    showMessage('Si è verificato un errore durante la modifica del nome del lavoratore.');
+                            childSnapshot.ref.set(newName);
+                            // Update attendance records
+                            database.ref('attendance').orderByChild('worker').equalTo(workerToEdit).once('value', attendanceSnapshot => {
+                                attendanceSnapshot.forEach(record => {
+                                    record.ref.update({ worker: newName });
                                 });
+                            });
+                            showMessage(`Il nome del lavoratore è stato modificato da ${workerToEdit} a ${newName}.`);
                         }
                     });
                 });
+                document.getElementById('newWorkerName').value = '';
             } else {
                 showMessage('Il nuovo nome non è valido o è uguale al nome attuale.');
             }
@@ -444,17 +398,11 @@
                 workerRef.once('value', snapshot => {
                     snapshot.forEach(childSnapshot => {
                         if (childSnapshot.val() === workerToRemove) {
-                            childSnapshot.ref.remove()
-                                .then(() => {
-                                    showMessage(`Il lavoratore ${workerToRemove} è stato rimosso.`);
-                                })
-                                .catch((error) => {
-                                    console.error("Error removing worker: ", error);
-                                    showMessage('Si è verificato un errore durante la rimozione del lavoratore.');
-                                });
+                            childSnapshot.ref.remove();
                         }
                     });
                 });
+                showMessage(`Il lavoratore ${workerToRemove} è stato rimosso.`);
             }
         }
 
@@ -470,6 +418,11 @@
             }
 
             const entryDate = new Date(dateTime);
+            if (checkDuplicateAction(worker, action, entryDate)) {
+                showMessage(`Attenzione: ${worker} ha già registrato un'azione di ${action} in questa data.`);
+                return;
+            }
+
             const timestamp = entryDate.toLocaleString('it-IT', {
                 day: '2-digit',
                 month: '2-digit',
@@ -480,17 +433,12 @@
             });
 
             const newRecord = { worker, action, timestamp, note };
-            database.ref('attendance').push(newRecord)
-                .then(() => {
-                    showMessage('Registrazione manuale inserita con successo.');
-                    document.getElementById('manualEntryDateTime').value = '';
-                    document.getElementById('manualEntryNote').value = '';
-                    updateButtonVisibility();
-                })
-                .catch((error) => {
-                    console.error("Error adding manual entry: ", error);
-                    showMessage('Si è verificato un errore durante l\'inserimento manuale.');
-                });
+            database.ref('attendance').push(newRecord);
+            showMessage('Registrazione manuale inserita con successo.');
+
+            // Reset form
+            document.getElementById('manualEntryDateTime').value = '';
+            document.getElementById('manualEntryNote').value = '';
         }
 
         function downloadCSV() {
@@ -556,7 +504,6 @@
             attendanceData = snapshot.val() ? Object.entries(snapshot.val()).map(([id, data]) => ({id, ...data})) : [];
             updateAttendanceTable();
             updateHoursWorkedTable();
-            updateButtonVisibility();
         });
 
         if ('serviceWorker' in navigator) {
