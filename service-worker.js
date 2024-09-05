@@ -1,8 +1,8 @@
 const CACHE_NAME = 'vmh-tracker-v1';
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
+  '/vmh/',
+  '/vmh/index.html',
+  '/vmh/manifest.json',
   'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js',
   'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js',
