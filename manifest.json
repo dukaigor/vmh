@@ -2,7 +2,7 @@
   "name": "VMH Tracker",
   "short_name": "VMH",
   "description": "Tracker for VMH workers",
-  "start_url": "/",
+  "start_url": "/vmh/",
   "display": "standalone",
   "background_color": "#2D2D2C",
   "theme_color": "#2D2D2C",
