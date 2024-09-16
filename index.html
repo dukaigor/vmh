@@ -359,9 +359,7 @@
                     const imageRef = storage.ref(`worker-images/${workerId}`);
                     await imageRef.put(imageFile);
                     console.log('Immagine caricata con successo');
-                    const imageUrl =
-
- await imageRef.getDownloadURL();
+                    const imageUrl = await imageRef.getDownloadURL();
                     console.log('URL immagine ottenuto:', imageUrl);
                     await database.ref(`workers/${workerId}`).update({imageUrl});
                     console.log('Dati del lavoratore aggiornati nel database');
@@ -456,18 +454,19 @@
         }
 
         function downloadCSV() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            endDate.setHours(23, 59, 59, 999); // Set to end of the day
 
-            if (!startDate || !endDate) {
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
                 showMessage('Per favore, seleziona sia la data iniziale che quella finale.');
                 return;
             }
 
             let csvContent = "Nome,Azione,Data e Ora,Nota\n";
             const filteredData = attendanceData.filter(record => {
-                const recordDate = new Date(record.timestamp);
-                return recordDate >= new Date(startDate) && recordDate <= new Date(endDate);
+                const recordDate = new Date(record.timestamp.split(', ')[0].split('/').reverse().join('-'));
+                return recordDate >= startDate && recordDate <= endDate;
             });
 
             filteredData.forEach((record) => {
@@ -480,7 +479,7 @@
             if (link.download !== undefined) {
                 const url = URL.createObjectURL(blob);
                 link.setAttribute("href", url);
-                link.setAttribute("download", `attendance_data_${startDate}_to_${endDate}.csv`);
+                link.setAttribute("download", `attendance_data_${startDate.toISOString().split('T')[0]}_to_${endDate.toISOString().split('T')[0]}.csv`);
                 link.style.visibility = 'hidden';
                 document.body.appendChild(link);
                 link.click();
