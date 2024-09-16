@@ -456,35 +456,54 @@
         function downloadCSV() {
             const startDate = new Date(document.getElementById('startDate').value);
             const endDate = new Date(document.getElementById('endDate').value);
-            endDate.setHours(23, 59, 59, 999); // Set to end of the day
+            endDate.setHours(23, 59, 59, 999); // Imposta alla fine della giornata
 
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
                 showMessage('Per favore, seleziona sia la data iniziale che quella finale.');
                 return;
             }
 
-            let csvContent = "Nome,Azione,Data e Ora,Nota\n";
-            const filteredData = attendanceData.filter(record => {
-                const recordDate = new Date(record.timestamp.split(', ')[0].split('/').reverse().join('-'));
-                return recordDate >= startDate && recordDate <= endDate;
-            });
+            const startTimestamp = startDate.toLocaleString('it-IT');
+            const endTimestamp = endDate.toLocaleString('it-IT');
 
-            filteredData.forEach((record) => {
-                const workerName = workers.find(w => w.id === record.worker)?.name || record.worker;
-                csvContent += `${workerName},${record.action},${record.timestamp},"${record.note || ''}"\n`;
-            });
+            database.ref('attendance')
+                .orderByChild('timestamp')
+                .startAt(startTimestamp)
+                .endAt(endTimestamp)
+                .once('value')
+                .then((snapshot) => {
+                    let csvContent = "Nome,Azione,Data e Ora,Nota\n";
+                    const filteredData = [];
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", `attendance_data_${startDate.toISOString().split('T')[0]}_to_${endDate.toISOString().split('T')[0]}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+                    snapshot.forEach((childSnapshot) => {
+                        const record = childSnapshot.val();
+                        const recordDate = new Date(record.timestamp.split(', ')[0].split('/').reverse().join('-'));
+                        if (recordDate >= startDate && recordDate <= endDate) {
+                            filteredData.push(record);
+                        }
+                    });
+
+                    filteredData.forEach((record) => {
+                        const workerName = workers.find(w => w.id === record.worker)?.name || record.worker;
+                        csvContent += `${workerName},${record.action},${record.timestamp},"${record.note || ''}"\n`;
+                    });
+
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement("a");
+                    if (link.download !== undefined) {
+                        const url = URL.createObjectURL(blob);
+                        link.setAttribute("href", url);
+                        link.setAttribute("download", `attendance_data_${startDate.toISOString().split('T')[0]}_to_${endDate.toISOString().split('T')[0]}.csv`);
+                        link.style.visibility = 'hidden';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Errore nel recupero dei dati:", error);
+                    showMessage('Si è verificato un errore durante il download dei dati.');
+                });
         }
 
         function deleteAllData() {
