@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-title" content="VMH Tracker">
     <link rel="apple-touch-icon" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png">
     <link rel="icon" type="image/png" href="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logovmh-vUQp53LQUYf0HYaB3uFVoeNZtgxavL.png">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/manifest.json">
     <title>VMH Tracker</title>
     <style>
         :root {
@@ -192,6 +192,14 @@
             <button onclick="manualEntry()">Inserisci</button>
             
             <h4>Entrate e Uscite Personale</h4>
+            <div>
+                <label for="startDate">Data Iniziale:</label>
+                <input type="date" id="startDate">
+            </div>
+            <div>
+                <label for="endDate">Data Finale:</label>
+                <input type="date" id="endDate">
+            </div>
             <button onclick="downloadCSV()">Scarica CSV</button>
             <button onclick="deleteAllData()">Elimina tutti i dati</button>
             <table id="attendanceTable">
@@ -351,7 +359,9 @@
                     const imageRef = storage.ref(`worker-images/${workerId}`);
                     await imageRef.put(imageFile);
                     console.log('Immagine caricata con successo');
-                    const imageUrl = await imageRef.getDownloadURL();
+                    const imageUrl =
+
+ await imageRef.getDownloadURL();
                     console.log('URL immagine ottenuto:', imageUrl);
                     await database.ref(`workers/${workerId}`).update({imageUrl});
                     console.log('Dati del lavoratore aggiornati nel database');
@@ -446,17 +456,31 @@
         }
 
         function downloadCSV() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                showMessage('Per favore, seleziona sia la data iniziale che quella finale.');
+                return;
+            }
+
             let csvContent = "Nome,Azione,Data e Ora,Nota\n";
-            attendanceData.forEach((record) => {
+            const filteredData = attendanceData.filter(record => {
+                const recordDate = new Date(record.timestamp);
+                return recordDate >= new Date(startDate) && recordDate <= new Date(endDate);
+            });
+
+            filteredData.forEach((record) => {
                 const workerName = workers.find(w => w.id === record.worker)?.name || record.worker;
                 csvContent += `${workerName},${record.action},${record.timestamp},"${record.note || ''}"\n`;
             });
+
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             if (link.download !== undefined) {
                 const url = URL.createObjectURL(blob);
                 link.setAttribute("href", url);
-                link.setAttribute("download", "attendance_data.csv");
+                link.setAttribute("download", `attendance_data_${startDate}_to_${endDate}.csv`);
                 link.style.visibility = 'hidden';
                 document.body.appendChild(link);
                 link.click();
@@ -487,11 +511,11 @@
 
         // Check if the browser supports service workers
         if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('service-worker.js').then(function(registration) {
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-      }, function(err) {
-        console.log('ServiceWorker registration failed: ', err);
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/vmh/service-worker.js').then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, function(err) {
+                    console.log('ServiceWorker registration failed: ', err);
                 });
             });
         }
